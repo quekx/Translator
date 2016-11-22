@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/view_toolbar" />
+
+    <Button
+        android:id="@+id/btn_rt_start_record"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_record" />
+
+    <Button
+        android:id="@+id/btn_rt_stop_record"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="@string/stop_record" />
+
+    <TextView
+        android:id="@+id/tv_rt_record_hint"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_rt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="中文->英文" />
+
+    <TextView
+        android:id="@+id/tv_rt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="中文->英文" />
+
+    <Button
+        android:id="@+id/btn_rt_en"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="英文->中文" />
+
+    <TextView
+        android:id="@+id/tv_rt_en"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="英文->中文" />
+</LinearLayout>
