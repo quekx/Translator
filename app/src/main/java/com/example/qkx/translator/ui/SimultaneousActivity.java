@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -266,7 +265,7 @@ public class SimultaneousActivity extends BaseActivity {
         mIat.setParameter(SpeechConstant.VAD_BOS, "4000");
 
         // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-        mIat.setParameter(SpeechConstant.VAD_EOS, "30000");
+        mIat.setParameter(SpeechConstant.VAD_EOS, "10000");
 
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
         mIat.setParameter(SpeechConstant.ASR_PTT, "1");
@@ -291,15 +290,18 @@ public class SimultaneousActivity extends BaseActivity {
 
             @Override
             public void onBeginOfSpeech() {
-                KLog.i(TAG, "onBeginOfSpeech");
+                KLog.d(TAG, "onBeginOfSpeech");
                 setSpeakButtonEnabled(true);
             }
 
             // 主动停止时不会回调
             @Override
             public void onEndOfSpeech() {
-                KLog.i(TAG, "onEndOfSpeech");
+                KLog.d(TAG, "onEndOfSpeech");
                 setSpeakButtonEnabled(false);
+
+                // 超时一分钟停止时，开始下一段识别
+                speak();
             }
 
             @Override
@@ -307,16 +309,17 @@ public class SimultaneousActivity extends BaseActivity {
                 String json = recognizerResult.getResultString();
                 String ret = parseJson(json);
 
-                Log.d(TAG, "res >> " + ret);
+                KLog.d(TAG, "res >> " + ret);
                 callback.onProcessResult(ret);
             }
 
             @Override
             public void onError(SpeechError speechError) {
                 String dep = speechError.getPlainDescription(true);
-                Log.d(TAG, "speech error is " + dep);
-                showTip(dep);
+                KLog.d(TAG, "speech error is " + dep);
+//                showTip(dep);
 
+//                stopSpeak();
                 setSpeakButtonEnabled(false);
             }
 
@@ -328,7 +331,8 @@ public class SimultaneousActivity extends BaseActivity {
         if (ret != ErrorCode.SUCCESS) {
             showTip("听写失败,错误码：" + ret);
         } else {
-            showTip("请开始说话");
+//            showTip("请开始说话");
+            KLog.d(TAG, "没有错误，请开始说话");
         }
     }
 
@@ -345,9 +349,16 @@ public class SimultaneousActivity extends BaseActivity {
     }
 
     @OnClick(R.id.btn_start_speak_syc)
-    void speakSyc() {
+    void startSpeak() {
         mTvResSyc.setText("");
         mTvTranslationSyc.setText("");
+        showTip("请开始说话");
+
+        speak();
+    }
+
+    private void speak() {
+        KLog.d(TAG, "speak start");
         switch (mCurrentMode) {
             case MODE_CH:
                 speechToTextCh();
@@ -379,8 +390,8 @@ public class SimultaneousActivity extends BaseActivity {
 
     @OnClick(R.id.btn_stop_speak_syc)
     void stopSpeak() {
-        if (this.mIat != null) {
-            this.mIat.stopListening();
+        if (mIat != null && mIat.isListening()) {
+            mIat.stopListening();
         }
         setSpeakButtonEnabled(false);
     }

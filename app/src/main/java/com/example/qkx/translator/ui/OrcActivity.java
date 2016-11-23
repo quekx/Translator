@@ -1,8 +1,6 @@
 package com.example.qkx.translator.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -204,14 +201,12 @@ public class OrcActivity extends BaseActivity {
                         Bitmap bitmap = data.getExtras().getParcelable("data");
                         uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
                                 bitmap, null, null));
-                        Log.d(TAG, "Uri >> " + uri.toString());
                     }
                     parseImgUri(uri);
                 }
                 break;
             case Constants.PHOTO_REQUEST_GALLERY:
                 if (data != null) {
-                    Log.d(TAG, "Uri >> " + data.getData().toString());
                     parseImgUri(data.getData());
                 }
                 break;
@@ -284,7 +279,7 @@ public class OrcActivity extends BaseActivity {
     static class MyHandler extends Handler {
         WeakReference<OrcActivity> weakReference;
 
-        public MyHandler(OrcActivity orcActivity) {
+        MyHandler(OrcActivity orcActivity) {
             super();
             weakReference = new WeakReference<>(orcActivity);
         }
@@ -297,7 +292,7 @@ public class OrcActivity extends BaseActivity {
                     String res = (String) msg.obj;
                     OrcActivity orcActivity = weakReference.get();
                     if (orcActivity != null) {
-                        orcActivity.tvResult.setText("识别结果:\n" + res);
+                        orcActivity.tvResult.setText(String.format("识别结果:\n%s", res));
                         Toast.makeText(orcActivity, "识别完成!", Toast.LENGTH_SHORT).show();
                         orcActivity.isOrcRunning = false;
                         orcActivity.btnOrc.setText("开始识别");
