@@ -1,7 +1,10 @@
 package com.example.qkx.translator.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,7 +24,6 @@ import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
-import com.iflytek.cloud.SpeechUtility;
 import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
@@ -35,11 +37,15 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 public class SimultaneousActivity extends BaseActivity {
+    private static final String TAG = SimultaneousActivity.class.getSimpleName();
     private static final String DIVIDER = "--------------------------------------------";
+
     private static final int MODE_CH = 0;
     private static final int MODE_EN = 1;
-    private static final String TAG = SimultaneousActivity.class.getSimpleName();
-    private Set<Character> mCharFilter;
+    private int mCurrentMode = MODE_CH;
+
+    private Set<Character> mCharFilter; // 处理标点符号
+
     @Bind(R.id.btn_syc_start_record)
     Button mBtnStartRecord;
     @Bind(R.id.btn_start_speak_syc)
@@ -50,12 +56,17 @@ public class SimultaneousActivity extends BaseActivity {
     Button mBtnStopSpeak;
     @Bind(R.id.btn_switch)
     Button mBtnSwitch;
-    private int mCurrentMode = 0;
-    private String mEngineType = "cloud";
+
+    private String mEngineType = SpeechConstant.TYPE_CLOUD;
     private SpeechRecognizer mIat;
     private InitListener mInitListener;
     private RestSource mRestSource;
-    private String mSycRecordPath = null;
+
+    // 目录路径
+    private String mSycRecordDirPath = null;
+    // 文本文件路径
+    private String mSycRecordTextPath = null;
+
     @Bind(R.id.tv_res_syc)
     TextView mTvResSyc;
     @Bind(R.id.tv_syc_record_hint)
@@ -73,8 +84,8 @@ public class SimultaneousActivity extends BaseActivity {
         if (mCharFilter.contains(dst.charAt(0))) {
             dst = dst.substring(1);
         }
-        FileUtil.addStringToFile(String.format("%s\n%s\n%s\n", src, dst, DIVIDER),
-                mSycRecordPath);
+        FileUtil.addStringToFile(String.format("%s\n%s\n\n", src, dst),
+                mSycRecordTextPath);
     }
 
     private void init() {
@@ -92,12 +103,12 @@ public class SimultaneousActivity extends BaseActivity {
     }
 
     private void initStt() {
-        SpeechUtility.createUtility(this, "appid=56b0105c");
+//        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=" + Constants.APPID);
         this.mInitListener = new InitListener() {
             public void onInit(int code) {
-                Log.d(SimultaneousActivity.TAG, "SpeechRecognizer init() code = " + code);
+                KLog.d(TAG, "SpeechRecognizer init() code = " + code);
                 if (code != 0) {
-                    SimultaneousActivity.this.showTip("初始化失败，错误码：" + code);
+                    showTip("初始化失败，错误码：" + code);
                 }
             }
         };
@@ -126,7 +137,7 @@ public class SimultaneousActivity extends BaseActivity {
     // 添加缺少的标点
     private String processDst(String origin, String dst) {
         if (dst == null || dst.length() == 0) return "";
-        if (origin == null ||origin.length() == 0) return dst;
+        if (origin == null || origin.length() == 0) return dst;
 
         if (!mCharFilter.contains(origin.charAt(origin.length() - 1)) &&
                 !mCharFilter.contains(dst.charAt(0))) return String.format(",%s", dst);
@@ -196,7 +207,7 @@ public class SimultaneousActivity extends BaseActivity {
                         mTvTranslationSyc.setText(String.format("%s%s", origin, dst));
 
                         // 文件
-                        if (mSycRecordPath != null) {
+                        if (mSycRecordTextPath != null) {
                             addSycStringToFile(src, dst);
                         }
                     }
@@ -227,7 +238,7 @@ public class SimultaneousActivity extends BaseActivity {
                         mTvTranslationSyc.setText(String.format("%s%s", origin, dst));
 
                         // 文件
-                        if (mSycRecordPath != null) {
+                        if (mSycRecordTextPath != null) {
                             addSycStringToFile(src, dst);
                         }
                     }
@@ -263,7 +274,14 @@ public class SimultaneousActivity extends BaseActivity {
         // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
         mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
-        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+
+        if (mSycRecordDirPath != null) {
+            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+                    String.format("%s/%s.wav", mSycRecordDirPath, FileUtil.getCurrentTime()));
+        } else {
+            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+        }
 
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
             @Override
@@ -277,6 +295,7 @@ public class SimultaneousActivity extends BaseActivity {
                 setSpeakButtonEnabled(true);
             }
 
+            // 主动停止时不会回调
             @Override
             public void onEndOfSpeech() {
                 KLog.i(TAG, "onEndOfSpeech");
@@ -341,17 +360,19 @@ public class SimultaneousActivity extends BaseActivity {
 
     @OnClick(R.id.btn_syc_start_record)
     void startSycRecord() {
-        String str = Environment.getExternalStorageDirectory().getPath() + "/record/同声翻译";
-        File dir = new File(str);
-        if (! dir.exists()) {
+        String date = FileUtil.getCurrentTime();
+//        String str = Environment.getExternalStorageDirectory() + "/record/同声翻译";
+        mSycRecordDirPath = Environment.getExternalStorageDirectory() + "/record/同声翻译/" + date;
+        File dir = new File(mSycRecordDirPath);
+        if (!dir.exists()) {
             dir.mkdirs();
         }
 
-        String date = FileUtil.getCurrentDate();
-        mSycRecordPath = str + "/" + date + ".txt";
-        FileUtil.addStringToFile(String.format("文件创建于%s\n%s\n\n", date, DIVIDER),
-                mSycRecordPath);
-        mTvSycRecordHint.setText(String.format("开始记录，记录保存至%s", mSycRecordPath));
+//        mSycRecordTextPath = mSycRecordDirPath + "/" + date + ".txt";
+        mSycRecordTextPath = String.format("%s/%s.txt", mSycRecordDirPath, date);
+        FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
+                mSycRecordTextPath);
+        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
 
         setRecordButtonEnabled(true);
     }
@@ -366,9 +387,11 @@ public class SimultaneousActivity extends BaseActivity {
 
     @OnClick(R.id.btn_syc_stop_record)
     void stopSycRecord() {
-        if (this.mSycRecordPath != null) {
-            this.mTvSycRecordHint.setText(String.format("停止记录，记录保存至%s", new Object[]{this.mSycRecordPath}));
-            this.mSycRecordPath = null;
+        if (mSycRecordDirPath != null) {
+            mTvSycRecordHint.setText(String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
+            mSycRecordDirPath = null;
+
+            mSycRecordTextPath = null;
         }
         setRecordButtonEnabled(false);
     }
@@ -388,8 +411,20 @@ public class SimultaneousActivity extends BaseActivity {
         }
     }
 
-    class MySynthesizerListener
-            implements SynthesizerListener {
+    @OnClick(R.id.btn_take_photo)
+    void takePhoto() {
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        if (mSycRecordDirPath != null) {
+            String filePath = String.format("%s/%s.png", mSycRecordDirPath, FileUtil.getCurrentTime());
+            Uri uri = Uri.fromFile(new File(filePath));
+
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            intent.putExtra("return-data", false);
+        }
+        startActivity(intent);
+    }
+
+    class MySynthesizerListener implements SynthesizerListener {
         MySynthesizerListener() {
         }
 

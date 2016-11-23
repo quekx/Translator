@@ -12,8 +12,8 @@ import java.util.Date;
 
 public class FileUtil {
 
-    public static String getCurrentDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+    public static String getCurrentTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
         String date = dateFormat.format(new Date());
         return date;
     }

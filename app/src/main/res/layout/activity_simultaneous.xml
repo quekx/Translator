@@ -38,6 +38,12 @@
         android:text="@string/stop_speak_simultaneous" />
 
     <Button
+        android:id="@+id/btn_take_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/take_photo" />
+
+    <Button
         android:id="@+id/btn_switch"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

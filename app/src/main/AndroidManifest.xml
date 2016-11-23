@@ -14,8 +14,9 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic2"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/MyAppTheme">
@@ -31,8 +32,8 @@
 
         <activity android:name=".ui.SettingActivity" />
         <activity android:name=".ui.ConversationActivity" />
-        <activity android:name=".ui.OrcActivity"/>
-        <activity android:name=".ui.SimultaneousActivity"/>
+        <activity android:name=".ui.OrcActivity" />
+        <activity android:name=".ui.SimultaneousActivity" />
 
     </application>
 
