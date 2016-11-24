@@ -20,7 +20,7 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
-import com.example.qkx.translator.ui.base.BaseActivity;
+import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.ImageUtil;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
-public class OrcActivity extends BaseActivity {
+public class OrcActivity extends BaseDetailActivity {
     private static final int CROP = 22;
     private static final String TAG = OrcActivity.class.getSimpleName();
     private static final int WHAT_ORC = 0;

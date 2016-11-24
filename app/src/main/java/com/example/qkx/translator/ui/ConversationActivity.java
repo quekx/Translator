@@ -15,7 +15,7 @@ import com.example.qkx.translator.R;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.rest.RestSource.TranslateCallback;
-import com.example.qkx.translator.ui.base.BaseActivity;
+import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.PreferenceUtil;
 import com.example.qkx.translator.utils.ToastUtil;
@@ -35,7 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class ConversationActivity extends BaseActivity {
+public class ConversationActivity extends BaseDetailActivity {
     private static final String DIVIDER = "--------------------------------------------";
     private static final String TAG = ConversationActivity.class.getSimpleName();
     @Bind(R.id.btn_rt_start_record)

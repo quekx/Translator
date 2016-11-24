@@ -16,7 +16,7 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
-import com.example.qkx.translator.ui.base.BaseActivity;
+import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.PreferenceUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.SpeechConstant;
@@ -25,7 +25,7 @@ import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
-public class SettingActivity extends BaseActivity {
+public class SettingActivity extends BaseDetailActivity {
     private static final String TAG = SettingActivity.class.getSimpleName();
     @Bind(R.id.edt_test_voice)
     EditText edtTest;

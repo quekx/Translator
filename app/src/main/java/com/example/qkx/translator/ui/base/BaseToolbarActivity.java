@@ -17,14 +17,12 @@ public abstract class BaseToolbarActivity extends AppCompatActivity {
 
     abstract protected int provideContentViewId();
 
-
-    public void onToolbarClick() {}
-
+    public void onToolbarClick() {
+    }
 
     protected AppBarLayout mAppBar;
     protected Toolbar mToolbar;
     protected boolean mIsHidden = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +75,9 @@ public abstract class BaseToolbarActivity extends AppCompatActivity {
 
     protected void hideOrShowToolbar() {
         mAppBar.animate()
-               .translationY(mIsHidden ? 0 : -mAppBar.getHeight())
-               .setInterpolator(new DecelerateInterpolator(2))
-               .start();
+                .translationY(mIsHidden ? 0 : -mAppBar.getHeight())
+                .setInterpolator(new DecelerateInterpolator(2))
+                .start();
         mIsHidden = !mIsHidden;
     }
 }
