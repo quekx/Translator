@@ -1,4 +1,4 @@
-package com.example.qkx.translator.ui;
+package com.example.qkx.translator.ui.conversation;
 
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,6 +15,7 @@ import com.example.qkx.translator.R;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.rest.RestSource.TranslateCallback;
+import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.PreferenceUtil;
@@ -153,7 +154,7 @@ public class ConversationActivity extends BaseDetailActivity {
         ToastUtil.showToastShort(this, str);
     }
 
-    private void speechToText(RetCallback callback, String str) {
+    private void speechToText(ResultCallback callback, String str) {
         speechToText(callback, str, this.mDefaultAvdBosMillis, this.mDefaultAvdEosMillis);
     }
 
@@ -165,7 +166,7 @@ public class ConversationActivity extends BaseDetailActivity {
      * @param avdBosMillis 说话未开始时的超时时间
      * @param avdEosMillis 说话停止后的超时时间
      */
-    private void speechToText(final RetCallback callback, String language, String avdBosMillis, String avdEosMillis) {
+    private void speechToText(final ResultCallback callback, String language, String avdBosMillis, String avdEosMillis) {
         mIat.setParameter(SpeechConstant.DOMAIN, "iat");
         mIat.setParameter(SpeechConstant.LANGUAGE, language);
         if (language.equals("zh_cn")) {
@@ -243,11 +244,11 @@ public class ConversationActivity extends BaseDetailActivity {
 
     }
 
-    private void speechToTextCh(RetCallback callback) {
+    private void speechToTextCh(ResultCallback callback) {
         speechToText(callback, "zh_cn");
     }
 
-    private void speechToTextEn(RetCallback callback) {
+    private void speechToTextEn(ResultCallback callback) {
         speechToText(callback, "en_us");
     }
 
@@ -275,7 +276,7 @@ public class ConversationActivity extends BaseDetailActivity {
 
     @OnClick(R.id.btn_rt)
     void rtTrans() {
-        speechToTextCh(new RetCallback() {
+        speechToTextCh(new ResultCallback() {
             public void onProcessResult(String result) {
                 tvRt.setText(result);
                 translateEn(result, new RestSource.TranslateCallback() {
@@ -297,7 +298,7 @@ public class ConversationActivity extends BaseDetailActivity {
 
     @OnClick(R.id.btn_rt_en)
     void rtTransEn() {
-        speechToTextEn(new RetCallback() {
+        speechToTextEn(new ResultCallback() {
             public void onProcessResult(String result) {
                 tvRtEn.setText(result);
                 translateCh(result, new RestSource.TranslateCallback() {

@@ -1,4 +1,4 @@
-package com.example.qkx.translator.ui;
+package com.example.qkx.translator.ui.simultaneous;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -15,6 +15,7 @@ import butterknife.OnClick;
 import com.example.qkx.translator.R;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
+import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.ToastUtil;
@@ -185,7 +186,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
     }
 
     private void speechToTextCh() {
-        speechToTextSyc(new RetCallback() {
+        speechToTextSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
                 String str = mTvResSyc.getText().toString();
@@ -216,7 +217,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
     }
 
     private void speechToTextEn() {
-        speechToTextSyc(new RetCallback() {
+        speechToTextSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
                 String str = mTvResSyc.getText().toString();
@@ -252,7 +253,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
      * @param callback 结果回调接口
      * @param language 语言种类
      */
-    private void speechToTextSyc(final RetCallback callback, String language) {
+    private void speechToTextSyc(final ResultCallback callback, String language) {
         mIat.setParameter(SpeechConstant.DOMAIN, "iat");
         mIat.setParameter(SpeechConstant.LANGUAGE, language);
         if (language.equals("zh_cn")) {

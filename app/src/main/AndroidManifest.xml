@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/MyAppTheme">
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,10 +30,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.SettingActivity" />
-        <activity android:name=".ui.ConversationActivity" />
-        <activity android:name=".ui.OrcActivity" />
-        <activity android:name=".ui.SimultaneousActivity" />
+        <activity android:name=".ui.setting.SettingActivity" />
+        <activity android:name=".ui.conversation.ConversationActivity" />
+        <activity android:name=".ui.orc.OrcActivity" />
+        <activity android:name=".ui.simultaneous.SimultaneousActivity" />
 
     </application>
 

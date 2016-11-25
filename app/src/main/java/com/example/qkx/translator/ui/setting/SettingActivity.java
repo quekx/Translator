@@ -1,4 +1,4 @@
-package com.example.qkx.translator.ui;
+package com.example.qkx.translator.ui.setting;
 
 import android.os.Bundle;
 import android.view.Menu;

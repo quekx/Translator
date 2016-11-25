@@ -1,4 +1,4 @@
-package com.example.qkx.translator.ui;
+package com.example.qkx.translator.ui.orc;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
