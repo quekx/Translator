@@ -53,7 +53,10 @@ public class ConversationActivity extends BaseDetailActivity {
     private SpeechRecognizer mIat;
     private InitListener mInitListener;
     private RestSource mRestSource;
-    private String mRtRecordPath = null;
+
+    private String mRtRecordTextPath = null;
+    private String mRtRecordDirPath = null;
+
     private SynthesizerListener mSynListener;
     private SpeechSynthesizer mTts;
     @Bind(R.id.tv_rt)
@@ -187,7 +190,14 @@ public class ConversationActivity extends BaseDetailActivity {
         // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
         mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
-        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+
+        if (mRtRecordDirPath != null) {
+            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+                    String.format("%s/%s.wav", mRtRecordDirPath, FileUtil.getCurrentTime()));
+        } else {
+            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+        }
 
 
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
@@ -286,9 +296,9 @@ public class ConversationActivity extends BaseDetailActivity {
                         str = str + '\n' + dst;
                         tvRt.setText(str);
                         read(dst);
-                        if (mRtRecordPath != null) {
+                        if (mRtRecordTextPath != null) {
                             FileUtil.addStringToFile(String.format("%s\n%s\n", str, DIVIDER),
-                                    mRtRecordPath);
+                                    mRtRecordTextPath);
                         }
                     }
                 });
@@ -308,9 +318,9 @@ public class ConversationActivity extends BaseDetailActivity {
                         str = str + '\n' + dst;
                         tvRtEn.setText(str);
                         read(dst);
-                        if (mRtRecordPath != null) {
+                        if (mRtRecordTextPath != null) {
                             FileUtil.addStringToFile(String.format("%s\n%s\n", str, DIVIDER),
-                                    mRtRecordPath);
+                                    mRtRecordTextPath);
                         }
                     }
                 });
@@ -320,25 +330,26 @@ public class ConversationActivity extends BaseDetailActivity {
 
     @OnClick(R.id.btn_rt_start_record)
     void startRtRecord() {
-        String str = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译";
-        File dir = new File(str);
+        mRtRecordDirPath = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译";
+        File dir = new File(mRtRecordDirPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
 
         String date = FileUtil.getCurrentTime();
-        mRtRecordPath = str + "/" + date + ".txt";
+        mRtRecordTextPath = mRtRecordDirPath + "/" + date + ".txt";
         FileUtil.addStringToFile(String.format("文件创建于%s\n%s\n\n", date, DIVIDER),
-                mRtRecordPath);
-        tvRtRecordHint.setText(String.format("开始记录，记录保存至%s", mRtRecordPath));
+                mRtRecordTextPath);
+        tvRtRecordHint.setText(String.format("开始记录，记录保存至%s", mRtRecordDirPath));
         setRecordButtonEnabled(true);
     }
 
     @OnClick(R.id.btn_rt_stop_record)
     void stopRtRecord() {
-        if (this.mRtRecordPath != null) {
-            this.tvRtRecordHint.setText(String.format("停止记录，记录保存至%s", mRtRecordPath));
-            this.mRtRecordPath = null;
+        if (mRtRecordDirPath != null) {
+            tvRtRecordHint.setText(String.format("停止记录，记录保存至%s", mRtRecordTextPath));
+            mRtRecordDirPath = null;
+            mRtRecordTextPath = null;
         }
         setRecordButtonEnabled(false);
     }

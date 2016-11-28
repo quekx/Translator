@@ -46,12 +46,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
     private Set<Character> mCharFilter; // 处理标点符号
 
-    @Bind(R.id.btn_syc_start_record)
-    Button mBtnStartRecord;
     @Bind(R.id.btn_start_speak_syc)
     Button mBtnStartSpeak;
-    @Bind(R.id.btn_syc_stop_record)
-    Button mBtnStopRecord;
     @Bind(R.id.btn_stop_speak_syc)
     Button mBtnStopSpeak;
     @Bind(R.id.btn_switch)
@@ -69,8 +65,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
     @Bind(R.id.tv_res_syc)
     TextView mTvResSyc;
-    @Bind(R.id.tv_syc_record_hint)
-    TextView mTvSycRecordHint;
+//    @Bind(R.id.tv_syc_record_hint)
+//    TextView mTvSycRecordHint;
     @Bind(R.id.tv_translation_syc)
     TextView mTvTranslationSyc;
 
@@ -143,24 +139,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
                 !mCharFilter.contains(dst.charAt(0))) return String.format(",%s", dst);
 
         return dst;
-    }
-
-    private void setRecordButtonEnabled(boolean isRecording) {
-        if (isRecording) {
-            if (mBtnStartRecord.isEnabled()) {
-                mBtnStartRecord.setEnabled(false);
-            }
-            if (!mBtnStopRecord.isEnabled()) {
-                mBtnStopRecord.setEnabled(true);
-            }
-        } else {
-            if (!mBtnStartRecord.isEnabled()) {
-                mBtnStartRecord.setEnabled(true);
-            }
-            if (mBtnStopRecord.isEnabled()) {
-                mBtnStopRecord.setEnabled(false);
-            }
-        }
     }
 
     private void setSpeakButtonEnabled(boolean isSpeaking) {
@@ -303,6 +281,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
                 KLog.d(TAG, "onEndOfSpeech");
 //                setSpeakButtonEnabled(false);
 
+                // 停止记录
+                stopSycRecord();
                 // 超时一分钟停止时，开始下一段识别
                 speak();
             }
@@ -356,6 +336,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
         mTvResSyc.setText("");
         mTvTranslationSyc.setText("");
         showTip("请开始说话");
+        startSycRecord();
 
         speak();
     }
@@ -372,42 +353,43 @@ public class SimultaneousActivity extends BaseDetailActivity {
         }
     }
 
-    @OnClick(R.id.btn_syc_start_record)
+    @OnClick(R.id.btn_stop_speak_syc)
+    void stopSpeak() {
+        if (mIat != null && mIat.isListening()) {
+            mIat.stopListening();
+
+            stopSycRecord();
+        }
+        setSpeakButtonEnabled(false);
+    }
+
+//    @OnClick(R.id.btn_syc_start_record)
     void startSycRecord() {
         String date = FileUtil.getCurrentTime();
-//        String str = Environment.getExternalStorageDirectory() + "/record/同声翻译";
         mSycRecordDirPath = Environment.getExternalStorageDirectory() + "/record/同声翻译/" + date;
+        KLog.d(TAG, "mSycRecordDirPath >> " + mSycRecordDirPath);
         File dir = new File(mSycRecordDirPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
 
-//        mSycRecordTextPath = mSycRecordDirPath + "/" + date + ".txt";
         mSycRecordTextPath = String.format("%s/%s.txt", mSycRecordDirPath, date);
         FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
                 mSycRecordTextPath);
-        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+//        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
 
-        setRecordButtonEnabled(true);
+//        setRecordButtonEnabled(true);
     }
 
-    @OnClick(R.id.btn_stop_speak_syc)
-    void stopSpeak() {
-        if (mIat != null && mIat.isListening()) {
-            mIat.stopListening();
-        }
-        setSpeakButtonEnabled(false);
-    }
-
-    @OnClick(R.id.btn_syc_stop_record)
+//    @OnClick(R.id.btn_syc_stop_record)
     void stopSycRecord() {
         if (mSycRecordDirPath != null) {
-            mTvSycRecordHint.setText(String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
+//            ToastUtil.showToastShort(this, String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
             mSycRecordDirPath = null;
-
             mSycRecordTextPath = null;
         }
-        setRecordButtonEnabled(false);
+//        setRecordButtonEnabled(false);
     }
 
     @OnClick(R.id.btn_switch)
