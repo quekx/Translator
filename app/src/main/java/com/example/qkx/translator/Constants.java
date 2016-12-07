@@ -23,4 +23,11 @@ public class Constants {
     public static final String KEY_VOICE_VOLUME = "voice_volume";
     public static final String KEY_AVD_BOS = "avd_bos";
     public static final String KEY_AVD_EOS = "avd_eos";
+
+    // Config Default value
+    public static final String VALUE_DEFAULT_VOICE_NAME = "xiaoyan"; // 发音人
+    public static final String VALUE_DEFAULT_VOICE_SPEED = "50";     // 语速
+    public static final String VALUE_DEFAULT_VOICE_VOLUME = "80";    // 音量
+    public static final String VALUE_DEFAULT_AVD_BOS = "4000";       // 前端超时
+    public static final String VALUE_DEFAULT_AVD_EOS = "1000";       // 后端超时
 }

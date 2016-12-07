@@ -28,6 +28,10 @@ import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -266,7 +270,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
             @Override
             public void onVolumeChanged(int i, byte[] bytes) {
-
+                saveAudioBytesToFile(bytes);
             }
 
             @Override
@@ -319,6 +323,28 @@ public class SimultaneousActivity extends BaseDetailActivity {
         }
     }
 
+    private String mAudioPath = null;
+
+    private void saveAudioBytesToFile(byte[] bytes) {
+        if (mAudioPath == null) return;
+
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(new File(mAudioPath), true);
+            os.write(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
         ButterKnife.bind(this);
@@ -331,14 +357,26 @@ public class SimultaneousActivity extends BaseDetailActivity {
         return R.layout.activity_simultaneous;
     }
 
-    @OnClick(R.id.btn_start_speak_syc)
-    void startSpeak() {
-        mTvResSyc.setText("");
-        mTvTranslationSyc.setText("");
-        showTip("请开始说话");
-        startSycRecord();
+    //    @OnClick(R.id.btn_syc_start_record)
+    void startSycRecord() {
+        String date = FileUtil.getCurrentTime();
+        mSycRecordDirPath = Environment.getExternalStorageDirectory() + "/record/同声翻译/" + date;
+        KLog.d(TAG, "mSycRecordDirPath >> " + mSycRecordDirPath);
+        File dir = new File(mSycRecordDirPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
-        speak();
+        // audio path
+        mAudioPath = String.format("%s/%s.pcm", mSycRecordDirPath, date);
+
+        mSycRecordTextPath = String.format("%s/%s.txt", mSycRecordDirPath, date);
+        FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
+                mSycRecordTextPath);
+//        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+
+//        setRecordButtonEnabled(true);
     }
 
     private void speak() {
@@ -353,6 +391,28 @@ public class SimultaneousActivity extends BaseDetailActivity {
         }
     }
 
+    @OnClick(R.id.btn_start_speak_syc)
+    void startSpeak() {
+        mTvResSyc.setText("");
+        mTvTranslationSyc.setText("");
+        showTip("请开始说话");
+        startSycRecord();
+
+        speak();
+    }
+
+    //    @OnClick(R.id.btn_syc_stop_record)
+    void stopSycRecord() {
+        if (mSycRecordDirPath != null) {
+//            ToastUtil.showToastShort(this, String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
+            mSycRecordDirPath = null;
+            mSycRecordTextPath = null;
+
+            mAudioPath = null;
+        }
+//        setRecordButtonEnabled(false);
+    }
+
     @OnClick(R.id.btn_stop_speak_syc)
     void stopSpeak() {
         if (mIat != null && mIat.isListening()) {
@@ -361,35 +421,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
             stopSycRecord();
         }
         setSpeakButtonEnabled(false);
-    }
-
-//    @OnClick(R.id.btn_syc_start_record)
-    void startSycRecord() {
-        String date = FileUtil.getCurrentTime();
-        mSycRecordDirPath = Environment.getExternalStorageDirectory() + "/record/同声翻译/" + date;
-        KLog.d(TAG, "mSycRecordDirPath >> " + mSycRecordDirPath);
-        File dir = new File(mSycRecordDirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        mSycRecordTextPath = String.format("%s/%s.txt", mSycRecordDirPath, date);
-        FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
-                mSycRecordTextPath);
-//        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
-        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
-
-//        setRecordButtonEnabled(true);
-    }
-
-//    @OnClick(R.id.btn_syc_stop_record)
-    void stopSycRecord() {
-        if (mSycRecordDirPath != null) {
-//            ToastUtil.showToastShort(this, String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
-            mSycRecordDirPath = null;
-            mSycRecordTextPath = null;
-        }
-//        setRecordButtonEnabled(false);
     }
 
     @OnClick(R.id.btn_switch)

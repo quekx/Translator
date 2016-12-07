@@ -50,9 +50,10 @@ public class ConversationActivity extends BaseDetailActivity {
     private String mDefaultSpeed;
     private String mDefaultVolume;
     private String mEngineType = "cloud";
+
+    // stt
     private SpeechRecognizer mIat;
     private InitListener mInitListener;
-    private RestSource mRestSource;
 
     private String mRtRecordTextPath = null;
     private String mRtRecordDirPath = null;
@@ -67,7 +68,6 @@ public class ConversationActivity extends BaseDetailActivity {
     TextView tvRtRecordHint;
 
     private void init() {
-        this.mRestSource = RestSource.getInstance();
         this.mBuffer = new StringBuffer();
         this.mDefaultAvdBosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_BOS, "4000");
         this.mDefaultAvdEosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_EOS, "1000");
@@ -78,15 +78,15 @@ public class ConversationActivity extends BaseDetailActivity {
 
     private void initStt() {
 //        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=" + Constants.APPID);
-        this.mInitListener = new InitListener() {
+        mInitListener = new InitListener() {
             public void onInit(int code) {
-                Log.d(ConversationActivity.TAG, "SpeechRecognizer init() code = " + code);
+                Log.d(TAG, "SpeechRecognizer init() code = " + code);
                 if (code != 0) {
-                    ConversationActivity.this.showTip("初始化失败，错误码：" + code);
+                    showTip("初始化失败，错误码：" + code);
                 }
             }
         };
-        this.mIat = SpeechRecognizer.createRecognizer(this, this.mInitListener);
+        mIat = SpeechRecognizer.createRecognizer(this, this.mInitListener);
     }
 
     private void initTts() {
@@ -263,11 +263,11 @@ public class ConversationActivity extends BaseDetailActivity {
     }
 
     private void translateCh(String q, TranslateCallback callback) {
-        mRestSource.queryCh(q, callback);
+        RestSource.getInstance().queryCh(q, callback);
     }
 
     private void translateEn(String q, TranslateCallback callback) {
-        mRestSource.queryEn(q, callback);
+        RestSource.getInstance().queryEn(q, callback);
     }
 
     @Override

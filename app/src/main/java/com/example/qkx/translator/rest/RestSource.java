@@ -17,7 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class RestSource {
 
-    private static volatile RestSource mInstance;
+    private static volatile RestSource sInstance;
     private final MyHttpService mAPI;
 
     private RestSource() {
@@ -48,14 +48,14 @@ public class RestSource {
     }
 
     public static RestSource getInstance() {
-        if (mInstance == null) {
+        if (sInstance == null) {
             synchronized (RestSource.class) {
-                if (mInstance == null) {
-                    mInstance = new RestSource();
+                if (sInstance == null) {
+                    sInstance = new RestSource();
                 }
             }
         }
-        return mInstance;
+        return sInstance;
     }
 
     public void queryCh(String q, TranslateCallback callback) {
