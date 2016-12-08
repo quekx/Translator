@@ -119,8 +119,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 for (int i = 0; i < mKeywords.size(); i++) {
-                    String keyword = mKeywords.get(i);
-                    if (ret.contains(keyword)) {
+                    if (ret.contains(mKeywords.get(i))) {
                         // 停止识别
                         stopSpeechRecognizing();
 

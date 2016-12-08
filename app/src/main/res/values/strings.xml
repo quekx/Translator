@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">翻译助手v1.03</string>
+    <string name="app_name">翻译助手v1.05</string>
 
     <string name="camera">拍照</string>
-    <string name="camera_crop">拍照(可裁剪)</string>
+    <string name="camera_crop">拍照</string>
     <string name="gallery">相册</string>
-    <string name="gallery_crop">相册(可裁剪)</string>
+    <string name="gallery_crop">相册</string>
 
     <string name="start_orc">开始识别</string>
     <string name="start_record">开始记录</string>

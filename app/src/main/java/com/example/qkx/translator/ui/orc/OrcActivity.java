@@ -257,12 +257,12 @@ public class OrcActivity extends BaseDetailActivity {
         startActivityForResult(intent, Constants.PHOTO_REQUEST_GALLERY_CROP);
     }
 
-    @OnClick(R.id.btn_pick)
-    void pickPhoto() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        startActivityForResult(intent, Constants.PHOTO_REQUEST_GALLERY);
-    }
+//    @OnClick(R.id.btn_pick)
+//    void pickPhoto() {
+//        Intent intent = new Intent(Intent.ACTION_PICK);
+//        intent.setType("image/*");
+//        startActivityForResult(intent, Constants.PHOTO_REQUEST_GALLERY);
+//    }
 
     @OnClick(R.id.btn_camera_with_crop)
     void takePhotoWithCrop() {
@@ -270,11 +270,11 @@ public class OrcActivity extends BaseDetailActivity {
         startActivityForResult(intent, Constants.PHOTO_REQUEST_CAMERA_CROP);
     }
 
-    @OnClick(R.id.btn_camera)
-    void takePhoto() {
-        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-        startActivityForResult(intent, Constants.PHOTO_REQUEST_CAMERA);
-    }
+//    @OnClick(R.id.btn_camera)
+//    void takePhoto() {
+//        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+//        startActivityForResult(intent, Constants.PHOTO_REQUEST_CAMERA);
+//    }
 
     static class MyHandler extends Handler {
         WeakReference<OrcActivity> weakReference;

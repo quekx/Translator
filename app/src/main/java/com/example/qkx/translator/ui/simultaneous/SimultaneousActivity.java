@@ -286,7 +286,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
 //                setSpeakButtonEnabled(false);
 
                 // 停止记录
-                stopSycRecord();
+//                stopSycRecord();
+
                 // 超时一分钟停止时，开始下一段识别
                 speak();
             }
