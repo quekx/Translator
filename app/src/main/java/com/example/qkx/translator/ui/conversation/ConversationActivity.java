@@ -12,6 +12,7 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.rest.RestSource.TranslateCallback;
@@ -19,6 +20,7 @@ import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.PreferenceUtil;
+import com.example.qkx.translator.utils.SpeechUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -68,12 +70,13 @@ public class ConversationActivity extends BaseDetailActivity {
     TextView tvRtRecordHint;
 
     private void init() {
-        this.mBuffer = new StringBuffer();
-        this.mDefaultAvdBosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_BOS, "4000");
-        this.mDefaultAvdEosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_EOS, "1000");
-        this.mDefaultName = PreferenceUtil.getString(this, Constants.KEY_VOICE_NAME, "xiaoyan");
-        this.mDefaultSpeed = PreferenceUtil.getString(this, Constants.KEY_VOICE_SPEED, "50");
-        this.mDefaultVolume = PreferenceUtil.getString(this, Constants.KEY_VOICE_VOLUME, "80");
+        mBuffer = new StringBuffer();
+
+        this.mDefaultAvdBosMillis = ConfigManager.getInstance().getAvdBos();
+        this.mDefaultAvdEosMillis = ConfigManager.getInstance().getAvdEos();
+        this.mDefaultName = ConfigManager.getInstance().getVoiceName();
+        this.mDefaultSpeed = ConfigManager.getInstance().getVoiceSpeed();
+        this.mDefaultVolume = ConfigManager.getInstance().getVoiceVolume();
     }
 
     private void initStt() {
@@ -92,25 +95,6 @@ public class ConversationActivity extends BaseDetailActivity {
     private void initTts() {
         this.mSynListener = new MySynthesizerListener();
         this.mTts = SpeechSynthesizer.createSynthesizer(this, null);
-    }
-
-    private String parseJson(String json) {
-        StringBuilder ret = new StringBuilder();
-        try {
-            JSONTokener tokener = new JSONTokener(json);
-            JSONObject joResult = new JSONObject(tokener);
-
-            JSONArray words = joResult.getJSONArray("ws");
-            for (int i = 0; i < words.length(); i++) {
-                JSONArray items = words.getJSONObject(i).getJSONArray("cw");
-                JSONObject object = items.getJSONObject(0);
-                ret.append(object.getString("w"));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return ret.toString();
     }
 
     private void read(String str) {
@@ -221,7 +205,7 @@ public class ConversationActivity extends BaseDetailActivity {
             public void onResult(RecognizerResult recognizerResult, boolean isLast) {
                 String json = recognizerResult.getResultString();
 //                Log.d(TAG, "speech result >> " + json);
-                String ret = parseJson(json);
+                String ret = SpeechUtil.parseJsonResult(json);
 
                 Log.d(TAG, "outcome >> " + ret);
 

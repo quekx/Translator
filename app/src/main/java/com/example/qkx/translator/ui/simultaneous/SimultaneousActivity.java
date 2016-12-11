@@ -13,11 +13,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
+import com.example.qkx.translator.utils.SpeechUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -28,7 +30,6 @@ import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -115,25 +116,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
         this.mIat = SpeechRecognizer.createRecognizer(this, this.mInitListener);
     }
 
-    private String parseJson(String json) {
-        StringBuilder ret = new StringBuilder();
-        try {
-            JSONTokener tokener = new JSONTokener(json);
-            JSONObject joResult = new JSONObject(tokener);
-
-            JSONArray words = joResult.getJSONArray("ws");
-            for (int i = 0; i < words.length(); i++) {
-                JSONArray items = words.getJSONObject(i).getJSONArray("cw");
-                JSONObject object = items.getJSONObject(0);
-                ret.append(object.getString("w"));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return ret.toString();
-    }
-
     // 添加缺少的标点
     private String processDst(String origin, String dst) {
         if (dst == null || dst.length() == 0) return "";
@@ -167,8 +149,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
         ToastUtil.showToastShort(this, str);
     }
 
-    private void speechToTextCh() {
-        speechToTextSyc(new ResultCallback() {
+    private void recognizeChinese() {
+        recognizeSpeechSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
                 String str = mTvResSyc.getText().toString();
@@ -198,8 +180,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
         }, "zh_cn");
     }
 
-    private void speechToTextEn() {
-        speechToTextSyc(new ResultCallback() {
+    private void recognizeEnglish() {
+        recognizeSpeechSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
                 String str = mTvResSyc.getText().toString();
@@ -235,8 +217,10 @@ public class SimultaneousActivity extends BaseDetailActivity {
      * @param callback 结果回调接口
      * @param language 语言种类
      */
-    private void speechToTextSyc(final ResultCallback callback, String language) {
-        mIat.setParameter(SpeechConstant.DOMAIN, "iat");
+    private void recognizeSpeechSyc(final ResultCallback callback, String language) {
+        // 场景
+        mIat.setParameter(SpeechConstant.DOMAIN, ConfigManager.getInstance().getDomain());
+
         mIat.setParameter(SpeechConstant.LANGUAGE, language);
         if (language.equals("zh_cn")) {
             mIat.setParameter(SpeechConstant.ACCENT, "mandarin");
@@ -295,7 +279,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
             @Override
             public void onResult(com.iflytek.cloud.RecognizerResult recognizerResult, boolean isLast) {
                 String json = recognizerResult.getResultString();
-                String ret = parseJson(json);
+                String ret = SpeechUtil.parseJsonResult(json);
 
                 KLog.d(TAG, "res >> " + ret);
                 callback.onProcessResult(ret);
@@ -384,10 +368,10 @@ public class SimultaneousActivity extends BaseDetailActivity {
         KLog.d(TAG, "speak start");
         switch (mCurrentMode) {
             case MODE_CH:
-                speechToTextCh();
+                recognizeChinese();
                 break;
             case MODE_EN:
-                speechToTextEn();
+                recognizeEnglish();
                 break;
         }
     }

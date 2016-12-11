@@ -54,4 +54,10 @@ public class ConfigManager {
         return PreferenceUtil.getString(MyApp.getAppInstance(), Constants.KEY_AVD_EOS,
                 Constants.VALUE_DEFAULT_AVD_EOS);
     }
+
+    // 应用领域
+    public String getDomain() {
+        return PreferenceUtil.getString(MyApp.getAppInstance(), Constants.KEY_DOMAIN,
+                Constants.VALUE_DEFAULT_DOMAIN);
+    }
 }

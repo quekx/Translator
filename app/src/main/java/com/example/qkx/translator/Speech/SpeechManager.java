@@ -1,6 +1,7 @@
 package com.example.qkx.translator.Speech;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.example.qkx.translator.MyApp;
 import com.example.qkx.translator.config.ConfigManager;
@@ -74,7 +75,7 @@ public class SpeechManager {
         }
     }
 
-    // tts声音识别
+    // tts 声音合成
     public void synthesizeSpeech(String text) {
         synthesizeSpeech(text, null, null, null);
     }
@@ -89,7 +90,7 @@ public class SpeechManager {
 
     public void synthesizeSpeech(String text, String voiceName, String voiceSpeed, String voiceVolume,
                                  BaseSynthesizerListener listener) {
-        if (text == null || text.length() == 0) return;
+        if (TextUtils.isEmpty(text)) return;
         SpeechSynthesizer tts = SpeechSynthesizer.getSynthesizer();
         if (tts == null) return;
 
@@ -111,7 +112,7 @@ public class SpeechManager {
         tts.startSpeaking(text, listener);
     }
 
-    // stt声音合成
+    // stt 声音识别
     public void recognizeChinese(BaseRecognizerListener listener) {
         recognizeSpeech(listener, "zh_cn", null, null);
     }
@@ -122,8 +123,13 @@ public class SpeechManager {
 
     public void recognizeSpeech(BaseRecognizerListener listener,
                                 String language, String avdBosMillis, String avdEosMillis) {
-        SpeechRecognizer iat = SpeechRecognizer.getRecognizer();
-        if (iat == null) return;
+        recognizeSpeech(listener, language, avdBosMillis, avdEosMillis, null);
+    }
+
+    public void recognizeSpeech(BaseRecognizerListener listener,
+                                String language, String avdBosMillis, String avdEosMillis, String domain) {
+        SpeechRecognizer stt = SpeechRecognizer.getRecognizer();
+        if (stt == null) return;
 
         if (avdBosMillis == null) {
             avdBosMillis = ConfigManager.getInstance().getAvdBos();
@@ -131,19 +137,22 @@ public class SpeechManager {
         if (avdEosMillis == null) {
             avdEosMillis = ConfigManager.getInstance().getAvdEos();
         }
-
-        iat.setParameter(SpeechConstant.DOMAIN, "iat");
-        iat.setParameter(SpeechConstant.LANGUAGE, language);
-        if (language.equals("zh_cn")) {
-            iat.setParameter(SpeechConstant.ACCENT, "mandarin");
+        if (domain == null) {
+            domain = ConfigManager.getInstance().getDomain();
         }
-        iat.setParameter(SpeechConstant.RESULT_TYPE, "json");
-        iat.setParameter(SpeechConstant.ENGINE_TYPE, mEngineType);
-        iat.setParameter(SpeechConstant.VAD_BOS, avdBosMillis); // 设置语音前端点
-        iat.setParameter(SpeechConstant.VAD_EOS, avdEosMillis); // 设置语音后端点
-        iat.setParameter(SpeechConstant.ASR_PTT, "1"); // 设置标点符号
 
-        int ret = iat.startListening(listener);
+        stt.setParameter(SpeechConstant.DOMAIN, domain);
+        stt.setParameter(SpeechConstant.LANGUAGE, language);
+        if (language.equals("zh_cn")) {
+            stt.setParameter(SpeechConstant.ACCENT, "mandarin");
+        }
+        stt.setParameter(SpeechConstant.RESULT_TYPE, "json");
+        stt.setParameter(SpeechConstant.ENGINE_TYPE, mEngineType);
+        stt.setParameter(SpeechConstant.VAD_BOS, avdBosMillis); // 设置语音前端点
+        stt.setParameter(SpeechConstant.VAD_EOS, avdEosMillis); // 设置语音后端点
+        stt.setParameter(SpeechConstant.ASR_PTT, "1"); // 设置标点符号
+
+        int ret = stt.startListening(listener);
         if (ret != ErrorCode.SUCCESS) {
             ToastUtil.showToastShort(MyApp.getAppInstance(), "听写失败,错误码：" + ret);
         } else {

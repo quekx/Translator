@@ -16,6 +16,7 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.PreferenceUtil;
 import com.example.qkx.translator.utils.ToastUtil;
@@ -27,18 +28,25 @@ import com.socks.library.KLog;
 
 public class SettingActivity extends BaseDetailActivity {
     private static final String TAG = SettingActivity.class.getSimpleName();
+
     @Bind(R.id.edt_test_voice)
     EditText edtTest;
+
     private String[] mBosTimeMillis = {"1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000"};
     private String[] mBosTimes = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+
     private String mDefaultAvdBosMillis;
     private String mDefaultAvdEosMillis;
     private String mDefaultName;
     private String mDefaultSpeed;
     private String mDefaultVolume;
+    private String mDefaultDomain;
+
     private String[] mEosTimeMillis = {"1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000"};
     private String[] mEosTimes = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+
     private String[] mSpeeds = {"10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
+
     @Bind(R.id.spinner_bos)
     Spinner mSpinnerBos;
     @Bind(R.id.spinner_eos)
@@ -49,18 +57,25 @@ public class SettingActivity extends BaseDetailActivity {
     Spinner mSpinnerSpeed;
     @Bind(R.id.spinner_volume)
     Spinner mSpinnerVolume;
+    @Bind(R.id.spinner_domain)
+    Spinner mSpinnerDomain;
+
     private MySynthesizerListener mSynListener;
     private SpeechSynthesizer mTts;
     private String[] mVoiceDisplayNames = {"青年女声(小燕)", "青年男声(小峰)", "中年男声(老孙)", "女声播音员(小筠)"};
     private String[] mVoiceNames = {"xiaoyan", "xiaofeng", "vils", "aisjying"};
     private String[] mVolumes = {"10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
 
+    private String[] mDomains = {"iat", "video", "poi", "music"};
+    private String[] mDomainNames = {"短信和日常用语", "视频", "地图", "音乐"};
+
     private void init() {
-        this.mDefaultName = PreferenceUtil.getString(this, Constants.KEY_VOICE_NAME, "xiaoyan");
-        this.mDefaultSpeed = PreferenceUtil.getString(this, Constants.KEY_VOICE_SPEED, "50");
-        this.mDefaultVolume = PreferenceUtil.getString(this, Constants.KEY_VOICE_VOLUME, "80");
-        this.mDefaultAvdBosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_BOS, "4000");
-        this.mDefaultAvdEosMillis = PreferenceUtil.getString(this, Constants.KEY_AVD_EOS, "1000");
+        mDefaultName = ConfigManager.getInstance().getVoiceName();
+        mDefaultSpeed = ConfigManager.getInstance().getVoiceSpeed();
+        mDefaultVolume = ConfigManager.getInstance().getVoiceVolume();
+        mDefaultAvdBosMillis = ConfigManager.getInstance().getAvdBos();
+        mDefaultAvdEosMillis = ConfigManager.getInstance().getAvdEos();
+        mDefaultDomain = ConfigManager.getInstance().getDomain();
     }
 
     private void initTts() {
@@ -92,6 +107,7 @@ public class SettingActivity extends BaseDetailActivity {
         PreferenceUtil.putString(this, Constants.KEY_VOICE_VOLUME, mDefaultVolume);
         PreferenceUtil.putString(this, Constants.KEY_AVD_BOS, mDefaultAvdBosMillis);
         PreferenceUtil.putString(this, Constants.KEY_AVD_EOS, mDefaultAvdEosMillis);
+        PreferenceUtil.putString(this, Constants.KEY_DOMAIN, mDefaultDomain);
 
         ToastUtil.showToastShort(this, "保存成功");
         finish();
@@ -186,6 +202,24 @@ public class SettingActivity extends BaseDetailActivity {
             }
         });
         mSpinnerEos.setSelection(0);
+
+        // 场景
+        ArrayAdapter<String> adapterDomain = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, mDomainNames);
+        adapterDomain.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerDomain.setAdapter(adapterDomain);
+        mSpinnerDomain.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mDefaultDomain = mDomains[position];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        mSpinnerDomain.setSelection(0);
 
     }
 

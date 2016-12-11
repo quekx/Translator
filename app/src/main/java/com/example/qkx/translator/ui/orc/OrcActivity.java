@@ -8,7 +8,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,8 +20,10 @@ import butterknife.OnClick;
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
+import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.ImageUtil;
 import com.googlecode.tesseract.android.TessBaseAPI;
+import com.socks.library.KLog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,18 +35,24 @@ import java.lang.ref.WeakReference;
 public class OrcActivity extends BaseDetailActivity {
     private static final int CROP = 22;
     private static final String TAG = OrcActivity.class.getSimpleName();
-    private static final int WHAT_ORC = 0;
-    private static final int WHAT_RESOURCE = 1;
+    private static final int MSG_ORC = 0;
+    private static final int MSG_RESOURCE_COPY = 1;
+
     private String SD_PATH;
-    private Bitmap bitmap;
+    private Bitmap mBitmap;
+
     @Bind(R.id.btn_orc)
     Button btnOrc;
     private MyHandler handler;
     @Bind(R.id.iv_pic)
     ImageView imageView;
-    private Uri imgUri;
+
+    private Uri mCurrentImgUri;
+    private Uri mCurrentCropUri;
+
     private boolean isOrcRunning = false;
     private TessBaseAPI tessBaseAPI;
+
     @Bind(R.id.tv_result)
     TextView tvResult;
 
@@ -53,33 +60,17 @@ public class OrcActivity extends BaseDetailActivity {
         String path = SD_PATH + "/tessdata/eng.traineddata";
         File file = new File(path);
         if (file.exists()) {
-            Log.i(TAG, "eng.traineddata exist!");
+            KLog.i(TAG, "eng.traineddata exist!");
             return true;
         } else {
-            Log.i(TAG, "eng.traineddata do not exist!");
+            KLog.i(TAG, "eng.traineddata do not exist!");
             return false;
         }
     }
 
-    private void doCrop(Uri uri) {
-        if (uri == null) return;
-
-        File imgDir = new File(Environment.getExternalStorageDirectory(), "record/imgCrop");
-        if (!imgDir.exists() && !imgDir.isDirectory()) {
-            imgDir.mkdirs();
-        }
-        imgUri = Uri.fromFile(new File(imgDir, "img" + System.currentTimeMillis() + ".png"));
-
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setData(uri);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
-        intent.putExtra("return-data", false);
-        startActivityForResult(intent, CROP);
-    }
-
     private void init() {
         SD_PATH = Environment.getExternalStorageDirectory().getPath();
-        Log.d(TAG, "SD >> " + SD_PATH);
+        KLog.d(TAG, "SD >> " + SD_PATH);
         imageView = (ImageView) findViewById(R.id.iv_pic);
         tvResult = (TextView) findViewById(R.id.tv_result);
         handler = new MyHandler(this);
@@ -109,7 +100,7 @@ public class OrcActivity extends BaseDetailActivity {
                         while ((bytesRead = in.read(bytes)) > 0) {
                             fos.write(bytes, 0, bytesRead);
                         }
-                        Log.i(TAG, file.getPath() + " : copy finish!");
+                        KLog.i(TAG, file.getPath() + " : copy finish!");
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
@@ -130,7 +121,7 @@ public class OrcActivity extends BaseDetailActivity {
                     }
                     initTessBaseAPI();
 
-                    handler.sendEmptyMessage(WHAT_RESOURCE);
+                    handler.sendEmptyMessage(MSG_RESOURCE_COPY);
                 }
             }).start();
         } else {
@@ -147,10 +138,10 @@ public class OrcActivity extends BaseDetailActivity {
     private void parseImgUri(Uri uri) {
         if (uri == null) return;
 
-        Log.d(TAG, "uri >> " + uri.toString());
+        KLog.d(TAG, "parseImgUri: uri >> " + uri.toString());
         try {
-            bitmap = ImageUtil.decodeBitmapByRatioSize(this, 800, 800, uri);
-            imageView.setImageBitmap(bitmap);
+            mBitmap = ImageUtil.decodeBitmapByRatioSize(this, 800, 800, uri);
+            imageView.setImageBitmap(mBitmap);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -163,54 +154,71 @@ public class OrcActivity extends BaseDetailActivity {
             return;
         }
         switch (requestCode) {
-            case Constants.PHOTO_REQUEST_GALLERY_CROP:
+            case Constants.REQUEST_PHOTO_GALLERY_CROP:
                 if (data != null) {
-                    Log.d(TAG, "Uri >> " + data.getData().toString());
+                    KLog.d(TAG, "result gallery: Uri >> " + data.getData().toString());
                     doCrop(data.getData());
                 }
                 break;
-            case Constants.PHOTO_REQUEST_CAMERA_CROP:
-                if (data != null) {
-                    Uri uri = data.getData();
-                    if (uri == null) {
-                        Bitmap bitmap = data.getExtras().getParcelable("data");
-                        uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
-                                bitmap, null, null));
-                        Log.d(TAG, "Uri >> " + uri.toString());
-                    }
-                    doCrop(uri);
+            case Constants.REQUEST_PHOTO_CAMERA_CROP:
+//                if (data != null) {
+//                    Uri uri = data.getData();
+//                    if (uri == null) {
+//                        Bitmap bitmap = data.getExtras().getParcelable("data");
+//                        uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
+//                                bitmap, null, null));
+//                        KLog.d(TAG, "result camera: Uri >> " + uri.toString());
+//                    }
+//                    doCrop(uri);
+//                }
+
+                if (mCurrentImgUri == null) {
+                    KLog.d(TAG, "result camera: mCurrentImgUri is null ");
+
+                } else {
+                    KLog.d(TAG, "result camera: mCurrentImgUri >> " + mCurrentImgUri);
+                }
+                if (mCurrentImgUri != null) {
+                    add(mCurrentImgUri);
+
+                    doCrop(mCurrentImgUri);
+
+                    mCurrentImgUri = null;
                 }
                 break;
             case CROP:
                 if (data != null) {
-                    if (imgUri != null) {
-                        Log.d(TAG, "uri ---> " + imgUri.toString());
-                        try {
-                            bitmap = ImageUtil.decodeBitmapByRatioSize(this, 800, 800, imgUri);
-                            imageView.setImageBitmap(bitmap);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                    if (mCurrentCropUri != null) {
+                        KLog.d(TAG, "result crop: mCurrentCropUri >> " + mCurrentCropUri.toString());
+                        parseImgUri(mCurrentCropUri);
+
+                        mCurrentCropUri = null;
                     }
                 }
                 break;
-            case Constants.PHOTO_REQUEST_CAMERA:
-                if (data != null) {
-                    Uri uri = data.getData();
-                    if (uri == null) {
-                        Bitmap bitmap = data.getExtras().getParcelable("data");
-                        uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
-                                bitmap, null, null));
-                    }
-                    parseImgUri(uri);
-                }
-                break;
-            case Constants.PHOTO_REQUEST_GALLERY:
-                if (data != null) {
-                    parseImgUri(data.getData());
-                }
-                break;
+//            case Constants.REQUEST_PHOTO_CAMERA:
+//                if (data != null) {
+//                    Uri uri = data.getData();
+//                    if (uri == null) {
+//                        Bitmap bitmap = data.getExtras().getParcelable("data");
+//                        uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
+//                                bitmap, null, null));
+//                    }
+//                    parseImgUri(uri);
+//                }
+//                break;
+//            case Constants.REQUEST_PHOTO_GALLERY:
+//                if (data != null) {
+//                    parseImgUri(data.getData());
+//                }
+//                break;
         }
+    }
+
+    private void add(Uri mCurrentImgUri) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        mediaScanIntent.setData(mCurrentImgUri);
+        sendBroadcast(mediaScanIntent);
     }
 
     @Override
@@ -228,7 +236,7 @@ public class OrcActivity extends BaseDetailActivity {
 
     @OnClick(R.id.btn_orc)
     void orcTest() {
-        if (bitmap != null && !isOrcRunning) {
+        if (mBitmap != null && !isOrcRunning) {
             Toast.makeText(this, "开始识别!", Toast.LENGTH_SHORT).show();
             btnOrc.setText("正在识别...");
             btnOrc.setClickable(false);
@@ -236,17 +244,53 @@ public class OrcActivity extends BaseDetailActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    tessBaseAPI.setImage(bitmap);
-
+                    tessBaseAPI.setImage(mBitmap);
                     String res = tessBaseAPI.getUTF8Text();
                     tessBaseAPI.clear();
 
-                    Message msg = handler.obtainMessage();
-                    msg.what = WHAT_ORC;
-                    msg.obj = res;
+                    Message msg = handler.obtainMessage(MSG_ORC, res);
                     handler.sendMessage(msg);
                 }
             }).start();
+        }
+    }
+
+    private void doCrop(Uri uri) {
+        if (uri == null) return;
+
+        KLog.i(TAG, "doCrop: uri >> " + uri);
+
+        File imgCropDir = getCropDir();
+        if (!imgCropDir.exists() && !imgCropDir.isDirectory()) {
+            imgCropDir.mkdirs();
+        }
+        mCurrentCropUri = Uri.fromFile(new File(imgCropDir, FileUtil.getCurrentTime() + ".png"));
+
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentCropUri);
+        intent.putExtra("return-data", false);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, CROP);
+        } else {
+            KLog.e(TAG, "intent.resolveActivity(getPackageManager()) >> null");
+        }
+    }
+
+    @OnClick(R.id.btn_camera_with_crop)
+    void takePhotoWithCrop() {
+        File imgDir = getPhotoDir();
+        if (!imgDir.exists() && !imgDir.isDirectory()) {
+            imgDir.mkdirs();
+        }
+        mCurrentImgUri = Uri.fromFile(new File(imgDir, FileUtil.getCurrentTime() + ".png"));
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImgUri);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA_CROP);
         }
     }
 
@@ -254,27 +298,32 @@ public class OrcActivity extends BaseDetailActivity {
     void pickPhotoWithCrop() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, Constants.PHOTO_REQUEST_GALLERY_CROP);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY_CROP);
+        }
     }
 
 //    @OnClick(R.id.btn_pick)
 //    void pickPhoto() {
 //        Intent intent = new Intent(Intent.ACTION_PICK);
 //        intent.setType("image/*");
-//        startActivityForResult(intent, Constants.PHOTO_REQUEST_GALLERY);
+//        startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY);
 //    }
-
-    @OnClick(R.id.btn_camera_with_crop)
-    void takePhotoWithCrop() {
-        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-        startActivityForResult(intent, Constants.PHOTO_REQUEST_CAMERA_CROP);
-    }
 
 //    @OnClick(R.id.btn_camera)
 //    void takePhoto() {
 //        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-//        startActivityForResult(intent, Constants.PHOTO_REQUEST_CAMERA);
+//        startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA);
 //    }
+
+    private File getPhotoDir() {
+        return new File(Environment.getExternalStorageDirectory(), "record/img");
+    }
+
+    private File getCropDir() {
+        return new File(Environment.getExternalStorageDirectory(), "record/imgCrop");
+    }
 
     static class MyHandler extends Handler {
         WeakReference<OrcActivity> weakReference;
@@ -288,7 +337,7 @@ public class OrcActivity extends BaseDetailActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case WHAT_ORC:
+                case MSG_ORC:
                     String res = (String) msg.obj;
                     OrcActivity orcActivity = weakReference.get();
                     if (orcActivity != null) {
@@ -299,7 +348,7 @@ public class OrcActivity extends BaseDetailActivity {
                         orcActivity.btnOrc.setClickable(true);
                     }
                     break;
-                case WHAT_RESOURCE:
+                case MSG_RESOURCE_COPY:
                     Toast.makeText(weakReference.get(), "加载完成!", Toast.LENGTH_SHORT).show();
                     break;
             }
