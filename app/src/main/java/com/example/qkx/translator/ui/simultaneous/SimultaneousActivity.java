@@ -30,8 +30,11 @@ import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +73,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
     @Bind(R.id.tv_res_syc)
     TextView mTvResSyc;
-//    @Bind(R.id.tv_syc_record_hint)
+    //    @Bind(R.id.tv_syc_record_hint)
 //    TextView mTvSycRecordHint;
     @Bind(R.id.tv_translation_syc)
     TextView mTvTranslationSyc;
@@ -241,15 +244,16 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
         // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
-        mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
-
-        if (mSycRecordDirPath != null) {
-            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
-                    String.format("%s/%s.wav", mSycRecordDirPath, FileUtil.getCurrentTime()));
-        } else {
-            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
-                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
-        }
+//        mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
+//
+//        if (mSycRecordDirPath != null) {
+//            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+//                    String.format("%s/%s.wav", mSycRecordDirPath, FileUtil.getCurrentTime()));
+//        } else {
+//            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+//                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+//        }
+        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, null);
 
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
             @Override
@@ -393,9 +397,98 @@ public class SimultaneousActivity extends BaseDetailActivity {
             mSycRecordDirPath = null;
             mSycRecordTextPath = null;
 
+            savePcmAsWav();
             mAudioPath = null;
         }
 //        setRecordButtonEnabled(false);
+    }
+
+    private void savePcmAsWav() {
+        if (mAudioPath == null) return;
+
+        String newAudioPath = mAudioPath.replace("pcm", "wav");
+        FileInputStream in = null;
+        FileOutputStream out = null;
+        try {
+            in = new FileInputStream(mAudioPath);
+            out = new FileOutputStream(newAudioPath);
+
+            long totalAudioLen = in.getChannel().size();
+            long totalDataLen = totalAudioLen + 36;
+            long longSampleRate = 16000L;
+            int channels = 1;
+            long byteRate = 16 * longSampleRate * channels / 8;
+            addHeaderToWavFile(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
+
+            byte[] buffer = new byte[1024 * 4];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addHeaderToWavFile(FileOutputStream out, long totalAudioLen, long totalDataLen,
+                                    long longSampleRate, int channels, long byteRate) throws IOException {
+        byte[] header = new byte[44];
+        header[0] = 'R'; // RIFF/WAVE header
+        header[1] = 'I';
+        header[2] = 'F';
+        header[3] = 'F';
+        header[4] = (byte) (totalDataLen & 0xff);
+        header[5] = (byte) ((totalDataLen >> 8) & 0xff);
+        header[6] = (byte) ((totalDataLen >> 16) & 0xff);
+        header[7] = (byte) ((totalDataLen >> 24) & 0xff);
+        header[8] = 'W';
+        header[9] = 'A';
+        header[10] = 'V';
+        header[11] = 'E';
+        header[12] = 'f'; // 'fmt ' chunk
+        header[13] = 'm';
+        header[14] = 't';
+        header[15] = ' ';
+        header[16] = 16; // 4 bytes: size of 'fmt ' chunk
+        header[17] = 0;
+        header[18] = 0;
+        header[19] = 0;
+        header[20] = 1; // format = 1
+        header[21] = 0;
+        header[22] = (byte) channels;
+        header[23] = 0;
+        header[24] = (byte) (longSampleRate & 0xff);
+        header[25] = (byte) ((longSampleRate >> 8) & 0xff);
+        header[26] = (byte) ((longSampleRate >> 16) & 0xff);
+        header[27] = (byte) ((longSampleRate >> 24) & 0xff);
+        header[28] = (byte) (byteRate & 0xff);
+        header[29] = (byte) ((byteRate >> 8) & 0xff);
+        header[30] = (byte) ((byteRate >> 16) & 0xff);
+        header[31] = (byte) ((byteRate >> 24) & 0xff);
+        header[32] = (byte) (2 * 16 / 8); // block align
+        header[33] = 0;
+        header[34] = 16; // bits per sample
+        header[35] = 0;
+        header[36] = 'd';
+        header[37] = 'a';
+        header[38] = 't';
+        header[39] = 'a';
+        header[40] = (byte) (totalAudioLen & 0xff);
+        header[41] = (byte) ((totalAudioLen >> 8) & 0xff);
+        header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
+        header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
+        out.write(header, 0, 44);
     }
 
     @OnClick(R.id.btn_stop_speak_syc)
