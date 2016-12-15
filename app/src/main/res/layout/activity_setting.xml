@@ -45,6 +45,14 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="同声翻译设置"
+        android:textColor="@android:color/black"
+        android:textSize="16.0sp" />
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">

@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +20,8 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.data.ResultBean;
+import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
 import com.example.qkx.translator.utils.ImageUtil;
@@ -30,7 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
+import java.util.List;
 
 public class OrcActivity extends BaseDetailActivity {
     private static final int CROP = 22;
@@ -55,6 +59,10 @@ public class OrcActivity extends BaseDetailActivity {
 
     @Bind(R.id.tv_result)
     TextView tvResult;
+    @Bind(R.id.tv_result_translate)
+    TextView tvResultTranslate;
+
+    private StringBuffer mBuffer = new StringBuffer();
 
     private boolean checkResourceExist() {
         String path = SD_PATH + "/tessdata/eng.traineddata";
@@ -179,7 +187,7 @@ public class OrcActivity extends BaseDetailActivity {
                     KLog.d(TAG, "result camera: mCurrentImgUri >> " + mCurrentImgUri);
                 }
                 if (mCurrentImgUri != null) {
-                    add(mCurrentImgUri);
+                    addPhotoToMedia(mCurrentImgUri);
 
                     doCrop(mCurrentImgUri);
 
@@ -215,7 +223,7 @@ public class OrcActivity extends BaseDetailActivity {
         }
     }
 
-    private void add(Uri mCurrentImgUri) {
+    private void addPhotoToMedia(Uri mCurrentImgUri) {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         mediaScanIntent.setData(mCurrentImgUri);
         sendBroadcast(mediaScanIntent);
@@ -246,6 +254,7 @@ public class OrcActivity extends BaseDetailActivity {
                 public void run() {
                     tessBaseAPI.setImage(mBitmap);
                     String res = tessBaseAPI.getUTF8Text();
+                    KLog.i(TAG, "ORC： res >> " + res);
                     tessBaseAPI.clear();
 
                     Message msg = handler.obtainMessage(MSG_ORC, res);
@@ -304,6 +313,29 @@ public class OrcActivity extends BaseDetailActivity {
         }
     }
 
+    @OnClick(R.id.btn_translate)
+    void translateResult() {
+        String str = tvResult.getText().toString();
+        if (TextUtils.isEmpty(str)) return;
+
+        mBuffer.setLength(0);
+        RestSource.getInstance().queryCh(str, new RestSource.TranslateCallback() {
+            @Override
+            public void onProcessResult(ResultBean resultBean) {
+                if (resultBean == null) return;
+
+                List<ResultBean.TransResult> res = resultBean.trans_result;
+                if (res == null || res.size() == 0) return;
+
+                for (ResultBean.TransResult result : res) {
+                    mBuffer.append(result.dst + '\n');
+                }
+
+                tvResultTranslate.setText(mBuffer.toString());
+            }
+        });
+    }
+
 //    @OnClick(R.id.btn_pick)
 //    void pickPhoto() {
 //        Intent intent = new Intent(Intent.ACTION_PICK);
@@ -326,11 +358,11 @@ public class OrcActivity extends BaseDetailActivity {
     }
 
     static class MyHandler extends Handler {
-        WeakReference<OrcActivity> weakReference;
+        SoftReference<OrcActivity> softReference;
 
         MyHandler(OrcActivity orcActivity) {
             super();
-            weakReference = new WeakReference<>(orcActivity);
+            softReference = new SoftReference<OrcActivity>(orcActivity);
         }
 
         @Override
@@ -338,18 +370,20 @@ public class OrcActivity extends BaseDetailActivity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case MSG_ORC:
+                    OrcActivity orcActivity;
+                    if (softReference == null || (orcActivity = softReference.get()) == null)
+                        return;
                     String res = (String) msg.obj;
-                    OrcActivity orcActivity = weakReference.get();
-                    if (orcActivity != null) {
-                        orcActivity.tvResult.setText(String.format("识别结果:\n%s", res));
-                        Toast.makeText(orcActivity, "识别完成!", Toast.LENGTH_SHORT).show();
-                        orcActivity.isOrcRunning = false;
-                        orcActivity.btnOrc.setText("开始识别");
-                        orcActivity.btnOrc.setClickable(true);
-                    }
+                    orcActivity.tvResult.setText(res);
+                    Toast.makeText(orcActivity, "识别完成!", Toast.LENGTH_SHORT).show();
+                    orcActivity.isOrcRunning = false;
+                    orcActivity.btnOrc.setText("开始识别");
+                    orcActivity.btnOrc.setClickable(true);
                     break;
                 case MSG_RESOURCE_COPY:
-                    Toast.makeText(weakReference.get(), "加载完成!", Toast.LENGTH_SHORT).show();
+                    if (softReference == null || (orcActivity = softReference.get()) == null)
+                        return;
+                    Toast.makeText(orcActivity, "加载完成!", Toast.LENGTH_SHORT).show();
                     break;
             }
         }

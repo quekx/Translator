@@ -13,6 +13,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.Speech.BaseRecognizerListener;
+import com.example.qkx.translator.Speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
@@ -23,6 +25,7 @@ import com.example.qkx.translator.utils.SpeechUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
@@ -47,6 +50,7 @@ import org.json.JSONTokener;
 public class SimultaneousActivity extends BaseDetailActivity {
     private static final String TAG = SimultaneousActivity.class.getSimpleName();
     private static final String DIVIDER = "--------------------------------------------";
+    private static final String KEYWORD = "开始";
 
     private static final int MODE_CH = 0;
     private static final int MODE_EN = 1;
@@ -77,6 +81,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
 //    TextView mTvSycRecordHint;
     @Bind(R.id.tv_translation_syc)
     TextView mTvTranslationSyc;
+
+    private int mRecognizeTime = 0;
 
     // 记录时去除开始的标点
     private void addSycStringToFile(String src, String dst) {
@@ -363,7 +369,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
         FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
                 mSycRecordTextPath);
 //        mTvSycRecordHint.setText(String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
-        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+//        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至目录%s", mSycRecordDirPath));
+        ToastUtil.showToastShort(this, String.format("开始记录，记录保存至根目录%s", "/record/同声翻译/"));
 
 //        setRecordButtonEnabled(true);
     }
@@ -418,7 +425,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
             long longSampleRate = 16000L;
             int channels = 1;
             long byteRate = 16 * longSampleRate * channels / 8;
-            addHeaderToWavFile(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
+            FileUtil.addWavHeaderToFile(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
 
             byte[] buffer = new byte[1024 * 4];
             int len;
@@ -439,56 +446,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void addHeaderToWavFile(FileOutputStream out, long totalAudioLen, long totalDataLen,
-                                    long longSampleRate, int channels, long byteRate) throws IOException {
-        byte[] header = new byte[44];
-        header[0] = 'R'; // RIFF/WAVE header
-        header[1] = 'I';
-        header[2] = 'F';
-        header[3] = 'F';
-        header[4] = (byte) (totalDataLen & 0xff);
-        header[5] = (byte) ((totalDataLen >> 8) & 0xff);
-        header[6] = (byte) ((totalDataLen >> 16) & 0xff);
-        header[7] = (byte) ((totalDataLen >> 24) & 0xff);
-        header[8] = 'W';
-        header[9] = 'A';
-        header[10] = 'V';
-        header[11] = 'E';
-        header[12] = 'f'; // 'fmt ' chunk
-        header[13] = 'm';
-        header[14] = 't';
-        header[15] = ' ';
-        header[16] = 16; // 4 bytes: size of 'fmt ' chunk
-        header[17] = 0;
-        header[18] = 0;
-        header[19] = 0;
-        header[20] = 1; // format = 1
-        header[21] = 0;
-        header[22] = (byte) channels;
-        header[23] = 0;
-        header[24] = (byte) (longSampleRate & 0xff);
-        header[25] = (byte) ((longSampleRate >> 8) & 0xff);
-        header[26] = (byte) ((longSampleRate >> 16) & 0xff);
-        header[27] = (byte) ((longSampleRate >> 24) & 0xff);
-        header[28] = (byte) (byteRate & 0xff);
-        header[29] = (byte) ((byteRate >> 8) & 0xff);
-        header[30] = (byte) ((byteRate >> 16) & 0xff);
-        header[31] = (byte) ((byteRate >> 24) & 0xff);
-        header[32] = (byte) (2 * 16 / 8); // block align
-        header[33] = 0;
-        header[34] = 16; // bits per sample
-        header[35] = 0;
-        header[36] = 'd';
-        header[37] = 'a';
-        header[38] = 't';
-        header[39] = 'a';
-        header[40] = (byte) (totalAudioLen & 0xff);
-        header[41] = (byte) ((totalAudioLen >> 8) & 0xff);
-        header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
-        header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
-        out.write(header, 0, 44);
     }
 
     @OnClick(R.id.btn_stop_speak_syc)
@@ -527,6 +484,54 @@ public class SimultaneousActivity extends BaseDetailActivity {
             intent.putExtra("return-data", false);
         }
         startActivity(intent);
+    }
+
+    private void startKeywordRecognizing() {
+        BaseRecognizerListener listener = new BaseRecognizerListener() {
+            @Override
+            public void onResult(RecognizerResult recognizerResult, boolean b) {
+                String json = recognizerResult.getResultString();
+                String ret = SpeechUtil.parseJsonResult(json);
+
+                KLog.d(TAG, "keyword: res >> " + ret);
+                mRecognizeTime++;
+                if (mRecognizeTime > 3) {
+                    stopSpeechRecognizing();
+                    return;
+                }
+
+                if (ret.contains(KEYWORD)) {
+                    stopSpeechRecognizing();
+                    startSpeak();
+                }
+            }
+        };
+
+        SpeechManager.getInstance().recognizeChinese(listener);
+    }
+
+//    private void stopSpeechSynthesizing() {
+//        SpeechManager.getInstance().stopSpeechSynthesizing();
+//    }
+
+    private void stopSpeechRecognizing() {
+        SpeechManager.getInstance().stopSpeechRecognizing();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mRecognizeTime = 0;
+        startKeywordRecognizing();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SpeechManager.getInstance().stopSpeechRecognizing();
+        SpeechManager.getInstance().stopSpeechSynthesizing();
     }
 
     class MySynthesizerListener implements SynthesizerListener {

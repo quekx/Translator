@@ -75,7 +75,7 @@ public class SpeechManager {
         }
     }
 
-    // tts 声音合成
+    /******************* tts 语音合成 *******************/
     public void synthesizeSpeech(String text) {
         synthesizeSpeech(text, null, null, null);
     }
@@ -112,7 +112,14 @@ public class SpeechManager {
         tts.startSpeaking(text, listener);
     }
 
-    // stt 声音识别
+    public void stopSpeechSynthesizing() {
+        SpeechSynthesizer tts = SpeechSynthesizer.getSynthesizer();
+        if (tts != null && tts.isSpeaking()) {
+            tts.stopSpeaking();
+        }
+    }
+
+    /******************* stt 语音识别 *******************/
     public void recognizeChinese(BaseRecognizerListener listener) {
         recognizeSpeech(listener, "zh_cn", null, null);
     }
@@ -157,6 +164,13 @@ public class SpeechManager {
             ToastUtil.showToastShort(MyApp.getAppInstance(), "听写失败,错误码：" + ret);
         } else {
             ToastUtil.showToastShort(MyApp.getAppInstance(), "请开始说话");
+        }
+    }
+
+    public void stopSpeechRecognizing() {
+        SpeechRecognizer iat = SpeechRecognizer.getRecognizer();
+        if (iat != null && iat.isListening()) {
+            iat.stopListening();
         }
     }
 }

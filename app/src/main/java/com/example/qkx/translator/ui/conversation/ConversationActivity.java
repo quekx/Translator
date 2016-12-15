@@ -314,7 +314,7 @@ public class ConversationActivity extends BaseDetailActivity {
 
     @OnClick(R.id.btn_rt_start_record)
     void startRtRecord() {
-        mRtRecordDirPath = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译";
+        mRtRecordDirPath = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译/";
         File dir = new File(mRtRecordDirPath);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -324,7 +324,8 @@ public class ConversationActivity extends BaseDetailActivity {
         mRtRecordTextPath = mRtRecordDirPath + "/" + date + ".txt";
         FileUtil.addStringToFile(String.format("文件创建于%s\n%s\n\n", date, DIVIDER),
                 mRtRecordTextPath);
-        tvRtRecordHint.setText(String.format("开始记录，记录保存至%s", mRtRecordDirPath));
+//        tvRtRecordHint.setText(String.format("开始记录，记录保存至%s", mRtRecordDirPath));
+        tvRtRecordHint.setText(String.format("开始记录，记录保存至根目录%s", "/record/对话翻译/"));
         setRecordButtonEnabled(true);
     }
 

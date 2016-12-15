@@ -12,6 +12,9 @@ import com.example.qkx.translator.ui.conversation.ConversationActivity;
 import com.example.qkx.translator.ui.setting.SettingActivity;
 import com.example.qkx.translator.ui.simultaneous.SimultaneousActivity;
 import com.example.qkx.translator.ui.orc.OrcActivity;
+import com.example.qkx.translator.utils.NetworkUtil;
+import com.example.qkx.translator.utils.SpeechUtil;
+import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
@@ -53,9 +56,9 @@ public class MainActivity extends AppCompatActivity {
         SpeechManager.getInstance().init();
 
         mKeywords = new ArrayList<>();
-        mKeywords.add("对话翻译");
-        mKeywords.add("同声翻译");
-        mKeywords.add("图片翻译");
+        mKeywords.add("对话");
+        mKeywords.add("同声");
+        mKeywords.add("图片");
     }
 
     @OnClick(R.id.img_conversation)
@@ -80,10 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 合成相关
     private void stopSpeechSynthesizing() {
-        SpeechSynthesizer tts = SpeechSynthesizer.getSynthesizer();
-        if (tts != null && tts.isSpeaking()) {
-            tts.stopSpeaking();
-        }
+        SpeechManager.getInstance().stopSpeechSynthesizing();
     }
 
     private void startHintSynthesizing() {
@@ -99,10 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 识别相关
     private void stopSpeechRecognizing() {
-        SpeechRecognizer iat = SpeechRecognizer.getRecognizer();
-        if (iat != null && iat.isListening()) {
-            iat.stopListening();
-        }
+        SpeechManager.getInstance().stopSpeechRecognizing();
     }
 
     private void startKeywordRecognizing() {
@@ -110,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResult(RecognizerResult recognizerResult, boolean isLast) {
                 String json = recognizerResult.getResultString();
-                String ret = parseJson(json);
+                String ret = SpeechUtil.parseJsonResult(json);
 
-                KLog.d(TAG, "outcome >> " + ret);
+                KLog.d(TAG, "keyword: res >> " + ret);
                 mRecognizeTime++;
                 if (mRecognizeTime > 3) {
                     stopSpeechRecognizing();
@@ -135,12 +132,15 @@ public class MainActivity extends AppCompatActivity {
     private void processKeyword(int index) {
         switch (index) {
             case 0:
+                ToastUtil.showToastShort(this, "你好，进入对话翻译");
                 startConversation();
                 break;
             case 1:
+                ToastUtil.showToastShort(this, "你好，进入同声翻译");
                 startSimultaneous();
                 break;
             case 2:
+                ToastUtil.showToastShort(this, "你好，进入图片翻译");
                 startOrc();
                 break;
             default:
@@ -154,16 +154,13 @@ public class MainActivity extends AppCompatActivity {
         mRecognizeTime = 0;
 
 //        if (mIsFirstOpen) {
-        startHintSynthesizing();
+        if (NetworkUtil.isOnline()) {
+            startHintSynthesizing();
+        } else {
+            ToastUtil.showToastShort(this, "请连接网络");
+        }
 //            mIsFirstOpen = false;
 //        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        SpeechManager.getInstance().unInit();
     }
 
     @Override
@@ -171,6 +168,13 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
 
         stopSpeechSynthesizing();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SpeechManager.getInstance().unInit();
     }
 
     private String parseJson(String json) {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">翻译助手v1.05</string>
+    <string name="app_name">翻译助手v1.06</string>
 
     <string name="camera">拍照</string>
     <string name="camera_crop">拍照</string>
@@ -15,6 +15,8 @@
     <string name="switchover_en">切换至中文翻译</string>
 
     <string name="take_photo">拍照记录</string>
+
+    <string name="translate">翻译</string>
 
     <string name="title_conversation">对话翻译</string>
     <string name="title_orc">图片翻译</string>

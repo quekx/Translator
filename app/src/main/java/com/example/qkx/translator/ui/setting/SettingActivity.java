@@ -66,8 +66,8 @@ public class SettingActivity extends BaseDetailActivity {
     private String[] mVoiceNames = {"xiaoyan", "xiaofeng", "vils", "aisjying"};
     private String[] mVolumes = {"10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
 
-    private String[] mDomains = {"iat", "video", "poi", "music"};
-    private String[] mDomainNames = {"短信和日常用语", "视频", "地图", "音乐"};
+    private String[] mDomains = {"iat", "video", "music"};
+    private String[] mDomainNames = {"短信和日常用语", "视频", "音乐"};
 
     private void init() {
         mDefaultName = ConfigManager.getInstance().getVoiceName();
@@ -130,6 +130,8 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
+        int index = getConfigIndex(mVoiceNames, Constants.KEY_VOICE_NAME);
+        mSpinnerName.setSelection(index != -1 ? index : 0);
 
         // 语速
         ArrayAdapter<String> adapterSpeed = new ArrayAdapter<>(this,
@@ -147,7 +149,8 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
-        mSpinnerSpeed.setSelection(4);
+        index = getConfigIndex(mSpeeds, Constants.KEY_VOICE_SPEED);
+        mSpinnerSpeed.setSelection(index != -1 ? index : 4);
 
         // 音量
         ArrayAdapter<String> adapterVolume = new ArrayAdapter<>(this,
@@ -165,7 +168,8 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
-        mSpinnerVolume.setSelection(7);
+        index = getConfigIndex(mVolumes, Constants.KEY_VOICE_VOLUME);
+        mSpinnerVolume.setSelection(index != -1 ? index : 7);
 
         // 静音超时
         ArrayAdapter<String> adapterBos = new ArrayAdapter<>(this,
@@ -183,7 +187,8 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
-        mSpinnerBos.setSelection(3);
+        index = getConfigIndex(mBosTimeMillis, Constants.KEY_AVD_BOS);
+        mSpinnerBos.setSelection(index != -1 ? index : 3);
 
         // 说话超时
         ArrayAdapter<String> adapterEos = new ArrayAdapter<>(this,
@@ -201,7 +206,8 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
-        mSpinnerEos.setSelection(0);
+        index = getConfigIndex(mEosTimeMillis, Constants.KEY_AVD_EOS);
+        mSpinnerEos.setSelection(index != -1 ? index : 0);
 
         // 场景
         ArrayAdapter<String> adapterDomain = new ArrayAdapter<>(this,
@@ -219,8 +225,21 @@ public class SettingActivity extends BaseDetailActivity {
 
             }
         });
-        mSpinnerDomain.setSelection(0);
+        index = getConfigIndex(mDomains, Constants.KEY_DOMAIN);
+        mSpinnerDomain.setSelection(index != -1 ? index : 0);
 
+    }
+
+    private int getConfigIndex(String[] values, String key) {
+        String config = PreferenceUtil.getString(this, key);
+        if (config == null) return -1;
+
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(config)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
