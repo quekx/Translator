@@ -544,8 +544,8 @@ public class SimultaneousActivity extends BaseDetailActivity {
     protected void onPause() {
         super.onPause();
 
-        SpeechManager.getInstance().stopSpeechRecognizing();
-        SpeechManager.getInstance().stopSpeechSynthesizing();
+//        SpeechManager.getInstance().stopSpeechRecognizing();
+//        SpeechManager.getInstance().stopSpeechSynthesizing();
     }
 
     class MySynthesizerListener implements SynthesizerListener {

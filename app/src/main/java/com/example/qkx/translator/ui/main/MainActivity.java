@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 startConversation();
                 break;
             case 1:
-                ToastUtil.showToastShort(this, "你好，进入同声翻译");
+                ToastUtil.showToastShort(this, "你好，进入同声翻译，请说开始");
                 startSimultaneous();
                 break;
             case 2:
