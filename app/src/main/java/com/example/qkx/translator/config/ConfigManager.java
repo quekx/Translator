@@ -10,7 +10,7 @@ import com.example.qkx.translator.utils.PreferenceUtil;
  */
 
 public class ConfigManager {
-    private static ConfigManager sInstance;
+    private static volatile ConfigManager sInstance;
 
     public static ConfigManager getInstance() {
         if (sInstance == null) {

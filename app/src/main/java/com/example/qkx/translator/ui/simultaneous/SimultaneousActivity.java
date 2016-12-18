@@ -14,6 +14,7 @@ import butterknife.OnClick;
 
 import com.example.qkx.translator.R;
 import com.example.qkx.translator.Speech.BaseRecognizerListener;
+import com.example.qkx.translator.Speech.BaseSynthesizerListener;
 import com.example.qkx.translator.Speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
@@ -34,23 +35,16 @@ import com.socks.library.KLog;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 public class SimultaneousActivity extends BaseDetailActivity {
     private static final String TAG = SimultaneousActivity.class.getSimpleName();
     private static final String DIVIDER = "--------------------------------------------";
-    private static final String KEYWORD = "开始";
+    private static final String[] KEYWORDS = {"开始", "翻译"};
 
     private static final int MODE_CH = 0;
     private static final int MODE_EN = 1;
@@ -490,24 +484,42 @@ public class SimultaneousActivity extends BaseDetailActivity {
         BaseRecognizerListener listener = new BaseRecognizerListener() {
             @Override
             public void onResult(RecognizerResult recognizerResult, boolean b) {
-                String json = recognizerResult.getResultString();
-                String ret = SpeechUtil.parseJsonResult(json);
-
-                KLog.d(TAG, "keyword: res >> " + ret);
-                mRecognizeTime++;
-                if (mRecognizeTime > 3) {
-                    stopSpeechRecognizing();
-                    return;
-                }
-
-                if (ret.contains(KEYWORD)) {
-                    stopSpeechRecognizing();
-                    startSpeak();
-                }
+                doOnKeywordResult(recognizerResult, b);
             }
         };
 
         SpeechManager.getInstance().recognizeChinese(listener);
+    }
+
+    private void doOnKeywordResult(RecognizerResult recognizerResult, boolean b) {
+        String json = recognizerResult.getResultString();
+        String result = SpeechUtil.parseJsonResult(json);
+
+        KLog.d(TAG, "keyword result: res >> " + result);
+        mRecognizeTime++;
+        if (mRecognizeTime > 3) {
+            stopSpeechRecognizing();
+            return;
+        }
+
+        for (String keyword : KEYWORDS) {
+            if (result.contains(keyword)) {
+                onRecognizeKeywordSucceed();
+                return;
+            }
+        }
+    }
+
+    private void onRecognizeKeywordSucceed() {
+        BaseSynthesizerListener listener = new BaseSynthesizerListener() {
+            @Override
+            public void onCompleted(SpeechError error) {
+                stopSpeechRecognizing();
+                startSpeak();
+            }
+        };
+
+        SpeechManager.getInstance().synthesizeSpeech("好的", listener);
     }
 
 //    private void stopSpeechSynthesizing() {

@@ -20,7 +20,7 @@ import com.socks.library.KLog;
 public class SpeechManager {
     private static final String TAG = SpeechManager.class.getSimpleName();
 
-    private static SpeechManager sInstance;
+    private static volatile SpeechManager sInstance;
 
     private String mEngineType = SpeechConstant.TYPE_CLOUD;
 

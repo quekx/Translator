@@ -17,8 +17,6 @@ import com.example.qkx.translator.utils.SpeechUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechError;
-import com.iflytek.cloud.SpeechRecognizer;
-import com.iflytek.cloud.SpeechSynthesizer;
 import com.socks.library.KLog;
 
 import org.json.JSONArray;
@@ -90,11 +88,17 @@ public class MainActivity extends AppCompatActivity {
         BaseSynthesizerListener listener = new BaseSynthesizerListener() {
             @Override
             public void onCompleted(SpeechError error) {
-                //开始识别
-                startKeywordRecognizing();
+                doOnSynthesizeCompleted(error);
             }
         };
         SpeechManager.getInstance().synthesizeSpeech(WELCOME_TEXT, listener);
+    }
+
+    // 合成结束回调
+    private void doOnSynthesizeCompleted(SpeechError error) {
+        KLog.e(TAG, "" + error.getErrorDescription());
+        //开始识别
+        startKeywordRecognizing();
     }
 
     // 识别相关
@@ -106,27 +110,32 @@ public class MainActivity extends AppCompatActivity {
         BaseRecognizerListener listener = new BaseRecognizerListener() {
             @Override
             public void onResult(RecognizerResult recognizerResult, boolean isLast) {
-                String json = recognizerResult.getResultString();
-                String ret = SpeechUtil.parseJsonResult(json);
-
-                KLog.d(TAG, "keyword: res >> " + ret);
-                mRecognizeTime++;
-                if (mRecognizeTime > 3) {
-                    stopSpeechRecognizing();
-                    return;
-                }
-                for (int i = 0; i < mKeywords.size(); i++) {
-                    if (ret.contains(mKeywords.get(i))) {
-                        // 停止识别
-                        stopSpeechRecognizing();
-
-                        processKeyword(i);
-                        return;
-                    }
-                }
+                doOnKeywordResult(recognizerResult, isLast);
             }
         };
         SpeechManager.getInstance().recognizeChinese(listener);
+    }
+
+    // 识别结果回调
+    private void doOnKeywordResult(RecognizerResult recognizerResult, boolean isLast) {
+        String json = recognizerResult.getResultString();
+        String ret = SpeechUtil.parseJsonResult(json);
+
+        KLog.d(TAG, "keyword: res >> " + ret);
+        mRecognizeTime++;
+        if (mRecognizeTime > 3) {
+            stopSpeechRecognizing();
+            return;
+        }
+        for (int i = 0; i < mKeywords.size(); i++) {
+            if (ret.contains(mKeywords.get(i))) {
+                // 停止识别
+                stopSpeechRecognizing();
+
+                processKeyword(i);
+                return;
+            }
+        }
     }
 
     private void processKeyword(int index) {

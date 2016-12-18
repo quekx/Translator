@@ -2,7 +2,6 @@ package com.example.qkx.translator.ui.conversation;
 
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -10,7 +9,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
@@ -19,7 +17,6 @@ import com.example.qkx.translator.rest.RestSource.TranslateCallback;
 import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
-import com.example.qkx.translator.utils.PreferenceUtil;
 import com.example.qkx.translator.utils.SpeechUtil;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.ErrorCode;
@@ -30,6 +27,7 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
+import com.socks.library.KLog;
 
 import java.io.File;
 
@@ -83,7 +81,7 @@ public class ConversationActivity extends BaseDetailActivity {
 //        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=" + Constants.APPID);
         mInitListener = new InitListener() {
             public void onInit(int code) {
-                Log.d(TAG, "SpeechRecognizer init() code = " + code);
+                KLog.d(TAG, "SpeechRecognizer init() code = " + code);
                 if (code != 0) {
                     showTip("初始化失败，错误码：" + code);
                 }
@@ -204,10 +202,10 @@ public class ConversationActivity extends BaseDetailActivity {
             @Override
             public void onResult(RecognizerResult recognizerResult, boolean isLast) {
                 String json = recognizerResult.getResultString();
-//                Log.d(TAG, "speech result >> " + json);
+//                KLog.d(TAG, "speech result >> " + json);
                 String ret = SpeechUtil.parseJsonResult(json);
 
-                Log.d(TAG, "outcome >> " + ret);
+                KLog.d(TAG, "outcome >> " + ret);
 
                 mBuffer.append(ret);
                 if (isLast) {
@@ -218,8 +216,9 @@ public class ConversationActivity extends BaseDetailActivity {
 
             @Override
             public void onError(SpeechError speechError) {
-                String dep = speechError.getPlainDescription(true);
-                Log.d(TAG, "speech error is " + dep);
+//                String dep = speechError.getPlainDescription(true);
+                String dep = speechError.getErrorDescription();
+                KLog.d(TAG, "speech error is " + dep);
                 showTip(dep);
             }
 

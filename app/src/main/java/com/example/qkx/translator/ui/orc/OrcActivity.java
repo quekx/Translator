@@ -190,7 +190,6 @@ public class OrcActivity extends BaseDetailActivity {
                     addPhotoToMedia(mCurrentImgUri);
 
                     doCrop(mCurrentImgUri);
-
                     mCurrentImgUri = null;
                 }
                 break;
@@ -280,11 +279,11 @@ public class OrcActivity extends BaseDetailActivity {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentCropUri);
         intent.putExtra("return-data", false);
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, CROP);
-        } else {
-            KLog.e(TAG, "intent.resolveActivity(getPackageManager()) >> null");
-        }
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent, CROP);
+//        } else {
+//            KLog.e(TAG, "intent.resolveActivity(getPackageManager()) >> null");
+//        }
     }
 
     @OnClick(R.id.btn_camera_with_crop)
@@ -298,9 +297,9 @@ public class OrcActivity extends BaseDetailActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImgUri);
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA_CROP);
-        }
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA_CROP);
+//        }
     }
 
     @OnClick(R.id.btn_pick_with_crop)
@@ -308,9 +307,9 @@ public class OrcActivity extends BaseDetailActivity {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY_CROP);
-        }
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY_CROP);
+//        }
     }
 
     @OnClick(R.id.btn_translate)
