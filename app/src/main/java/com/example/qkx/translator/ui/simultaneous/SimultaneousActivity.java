@@ -534,8 +534,10 @@ public class SimultaneousActivity extends BaseDetailActivity {
     protected void onResume() {
         super.onResume();
 
-        mRecognizeTime = 0;
-        startKeywordRecognizing();
+        // 第一次进入才识别
+        if (mRecognizeTime == 0) {
+            startKeywordRecognizing();
+        }
     }
 
     @Override
