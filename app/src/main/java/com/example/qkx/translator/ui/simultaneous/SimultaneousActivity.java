@@ -340,6 +340,11 @@ public class SimultaneousActivity extends BaseDetailActivity {
         setTitle(getResources().getString(R.string.title_simultaneous));
         init();
         initStt();
+
+        // 第一次进入才识别
+        if (mRecognizeTime == 0) {
+            startKeywordRecognizing();
+        }
     }
 
     protected int provideContentViewId() {
@@ -533,11 +538,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        // 第一次进入才识别
-        if (mRecognizeTime == 0) {
-            startKeywordRecognizing();
-        }
     }
 
     @Override
