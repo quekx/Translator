@@ -96,7 +96,9 @@ public class MainActivity extends AppCompatActivity {
 
     // 合成结束回调
     private void doOnSynthesizeCompleted(SpeechError error) {
-        KLog.e(TAG, "" + error.getErrorDescription());
+        if (error != null) {
+            KLog.e(TAG, "" + error.getErrorDescription());
+        }
         //开始识别
         startKeywordRecognizing();
     }
