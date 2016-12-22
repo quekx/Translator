@@ -180,18 +180,15 @@ public class OrcActivity extends BaseDetailActivity {
 //                    doCrop(uri);
 //                }
 
+                KLog.d(TAG, "result camera: mCurrentImgUri >> " + mCurrentImgUri);
                 if (mCurrentImgUri == null) {
-                    KLog.d(TAG, "result camera: mCurrentImgUri is null ");
-
-                } else {
-                    KLog.d(TAG, "result camera: mCurrentImgUri >> " + mCurrentImgUri);
+                    return;
                 }
-                if (mCurrentImgUri != null) {
-                    addPhotoToMedia(mCurrentImgUri);
 
-                    doCrop(mCurrentImgUri);
-                    mCurrentImgUri = null;
-                }
+                addPhotoToMedia(mCurrentImgUri);
+
+                doCrop(mCurrentImgUri);
+                mCurrentImgUri = null;
                 break;
             case CROP:
                 if (data != null) {
@@ -203,28 +200,30 @@ public class OrcActivity extends BaseDetailActivity {
                     }
                 }
                 break;
-//            case Constants.REQUEST_PHOTO_CAMERA:
-//                if (data != null) {
-//                    Uri uri = data.getData();
-//                    if (uri == null) {
-//                        Bitmap bitmap = data.getExtras().getParcelable("data");
-//                        uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(),
-//                                bitmap, null, null));
-//                    }
-//                    parseImgUri(uri);
-//                }
-//                break;
-//            case Constants.REQUEST_PHOTO_GALLERY:
-//                if (data != null) {
-//                    parseImgUri(data.getData());
-//                }
-//                break;
+            case Constants.REQUEST_PHOTO_CAMERA:
+                KLog.d(TAG, "result camera: mCurrentImgUri >> " + mCurrentImgUri);
+                if (mCurrentImgUri == null) {
+                    return;
+                }
+
+                addPhotoToMedia(mCurrentImgUri);
+
+                parseImgUri(mCurrentImgUri);
+                mCurrentImgUri = null;
+                break;
+            case Constants.REQUEST_PHOTO_GALLERY:
+                if (data != null) {
+                    parseImgUri(data.getData());
+                }
+                break;
         }
     }
 
-    private void addPhotoToMedia(Uri mCurrentImgUri) {
+    private void addPhotoToMedia(Uri uri) {
+        if (uri == null) return;
+
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        mediaScanIntent.setData(mCurrentImgUri);
+        mediaScanIntent.setData(uri);
         sendBroadcast(mediaScanIntent);
     }
 
@@ -289,7 +288,7 @@ public class OrcActivity extends BaseDetailActivity {
     @OnClick(R.id.btn_camera_with_crop)
     void takePhotoWithCrop() {
         File imgDir = getPhotoDir();
-        if (!imgDir.exists() && !imgDir.isDirectory()) {
+        if (!imgDir.exists()) {
             imgDir.mkdirs();
         }
         mCurrentImgUri = Uri.fromFile(new File(imgDir, FileUtil.getCurrentTime() + ".png"));
@@ -297,9 +296,7 @@ public class OrcActivity extends BaseDetailActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImgUri);
 
-//        if (intent.resolveActivity(getPackageManager()) != null) {
         startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA_CROP);
-//        }
     }
 
     @OnClick(R.id.btn_pick_with_crop)
@@ -307,9 +304,27 @@ public class OrcActivity extends BaseDetailActivity {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
 
-//        if (intent.resolveActivity(getPackageManager()) != null) {
         startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY_CROP);
-//        }
+    }
+
+    @OnClick(R.id.btn_camera)
+    void takePhoto() {
+        File imgDir = getPhotoDir();
+        if (!imgDir.exists()) {
+            imgDir.mkdirs();
+        }
+        mCurrentImgUri = Uri.fromFile(new File(imgDir, FileUtil.getCurrentTime() + ".png"));
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImgUri);
+        startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA);
+    }
+
+    @OnClick(R.id.btn_pick)
+    void pickPhoto() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY);
     }
 
     @OnClick(R.id.btn_translate)
@@ -334,19 +349,6 @@ public class OrcActivity extends BaseDetailActivity {
             }
         });
     }
-
-//    @OnClick(R.id.btn_pick)
-//    void pickPhoto() {
-//        Intent intent = new Intent(Intent.ACTION_PICK);
-//        intent.setType("image/*");
-//        startActivityForResult(intent, Constants.REQUEST_PHOTO_GALLERY);
-//    }
-
-//    @OnClick(R.id.btn_camera)
-//    void takePhoto() {
-//        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-//        startActivityForResult(intent, Constants.REQUEST_PHOTO_CAMERA);
-//    }
 
     private File getPhotoDir() {
         return new File(Environment.getExternalStorageDirectory(), "record/img");
