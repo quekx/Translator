@@ -342,7 +342,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
         initStt();
 
         // 第一次进入才识别
-        if (mRecognizeTime == 0) {
+        if (mRecognizeTime == 0 && ConfigManager.getInstance().isSoundControlOpen()) {
             startKeywordRecognizing();
         }
     }
@@ -533,19 +533,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
     private void stopSpeechRecognizing() {
         SpeechManager.getInstance().stopSpeechRecognizing();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        SpeechManager.getInstance().stopSpeechRecognizing();
-//        SpeechManager.getInstance().stopSpeechSynthesizing();
     }
 
     class MySynthesizerListener implements SynthesizerListener {

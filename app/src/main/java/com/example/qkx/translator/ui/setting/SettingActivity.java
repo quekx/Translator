@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -60,6 +61,9 @@ public class SettingActivity extends BaseDetailActivity {
     @Bind(R.id.spinner_domain)
     Spinner mSpinnerDomain;
 
+    @Bind(R.id.checkbox_sound_control)
+    CheckBox mCheckBoxSoundControl;
+
     private MySynthesizerListener mSynListener;
     private SpeechSynthesizer mTts;
     private String[] mVoiceDisplayNames = {"青年女声(小燕)", "青年男声(小峰)", "中年男声(老孙)", "女声播音员(小筠)"};
@@ -108,12 +112,13 @@ public class SettingActivity extends BaseDetailActivity {
         PreferenceUtil.putString(this, Constants.KEY_AVD_BOS, mDefaultAvdBosMillis);
         PreferenceUtil.putString(this, Constants.KEY_AVD_EOS, mDefaultAvdEosMillis);
         PreferenceUtil.putString(this, Constants.KEY_DOMAIN, mDefaultDomain);
+        PreferenceUtil.putBoolean(this, Constants.KEY_SOUND_CONTROL, mCheckBoxSoundControl.isChecked());
 
         ToastUtil.showToastShort(this, "保存成功");
         finish();
     }
 
-    private void setupSpinner() {
+    private void setupViews() {
         // 发音人
         ArrayAdapter<String> adapterVoiceName = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, mVoiceDisplayNames);
@@ -228,6 +233,7 @@ public class SettingActivity extends BaseDetailActivity {
         index = getConfigIndex(mDomains, Constants.KEY_DOMAIN);
         mSpinnerDomain.setSelection(index != -1 ? index : 0);
 
+        mCheckBoxSoundControl.setChecked(ConfigManager.getInstance().isSoundControlOpen());
     }
 
     private int getConfigIndex(String[] values, String key) {
@@ -249,7 +255,7 @@ public class SettingActivity extends BaseDetailActivity {
         setTitle(getResources().getString(R.string.title_setting));
         init();
         initTts();
-        setupSpinner();
+        setupViews();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

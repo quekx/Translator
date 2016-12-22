@@ -173,13 +173,14 @@ public class ConversationActivity extends BaseDetailActivity {
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
         mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
 
-        if (mRtRecordDirPath != null) {
-            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
-                    String.format("%s/%s.wav", mRtRecordDirPath, FileUtil.getCurrentTime()));
-        } else {
-            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
-                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
-        }
+//        if (mRtRecordDirPath != null) {
+//            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+//                    String.format("%s/%s.wav", mRtRecordDirPath, FileUtil.getCurrentTime()));
+//        } else {
+//            mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH,
+//                    Environment.getExternalStorageDirectory() + "/msc/iat.wav");
+//        }
+        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, null);
 
 
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
@@ -205,7 +206,7 @@ public class ConversationActivity extends BaseDetailActivity {
 //                KLog.d(TAG, "speech result >> " + json);
                 String ret = SpeechUtil.parseJsonResult(json);
 
-                KLog.d(TAG, "outcome >> " + ret);
+                KLog.d(TAG, "onResult: res >> " + ret);
 
                 mBuffer.append(ret);
                 if (isLast) {
@@ -218,7 +219,7 @@ public class ConversationActivity extends BaseDetailActivity {
             public void onError(SpeechError speechError) {
 //                String dep = speechError.getPlainDescription(true);
                 String dep = speechError.getErrorDescription();
-                KLog.d(TAG, "speech error is " + dep);
+                KLog.d(TAG, "onError: speech error is " + dep);
                 showTip(dep);
             }
 

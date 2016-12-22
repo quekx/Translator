@@ -60,4 +60,9 @@ public class ConfigManager {
         return PreferenceUtil.getString(MyApp.getAppInstance(), Constants.KEY_DOMAIN,
                 Constants.VALUE_DEFAULT_DOMAIN);
     }
+
+    // 声控开关
+    public boolean isSoundControlOpen() {
+        return PreferenceUtil.getBoolean(MyApp.getAppInstance(), Constants.KEY_SOUND_CONTROL, true);
+    }
 }

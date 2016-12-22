@@ -24,6 +24,7 @@ public class Constants {
     public static final String KEY_AVD_BOS = "avd_bos";
     public static final String KEY_AVD_EOS = "avd_eos";
     public static final String KEY_DOMAIN = "domain";
+    public static final String KEY_SOUND_CONTROL = "sound_control";
 
     // Config Default value
     public static final String VALUE_DEFAULT_VOICE_NAME = "xiaoyan"; // 发音人
