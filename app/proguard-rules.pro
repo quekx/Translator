@@ -15,3 +15,38 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class com.googlecode.tesseract.** { *; }
+
+# xunfei
+-keep class com.iflytek.** { *; }
+
+# butterknife 7.0.1
+-keep class butterknife.** { *; }
+-keep class **$$ViewBinder { *; }
+-dontwarn butterknife.internal.**
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+
+#实体类不参与混淆
+-keep class com.example.qkx.translator.data.** { *; }
+
+# retrofit 2.0.1
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
+
+# okhttp
+-keep class okhttp3.* { *; }
+-keep interface okhttp3.* { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+-keepattributes Signature
+-keepattributes Annotation
+-keepattributes Exceptions
