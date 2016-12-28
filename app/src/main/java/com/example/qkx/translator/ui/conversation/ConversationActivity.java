@@ -186,7 +186,9 @@ public class ConversationActivity extends BaseDetailActivity {
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
             @Override
             public void onVolumeChanged(int i, byte[] bytes) {
-
+                if (mAudioPath != null) {
+                    FileUtil.saveBytesToFile(mAudioPath, bytes);
+                }
             }
 
             @Override
@@ -312,29 +314,40 @@ public class ConversationActivity extends BaseDetailActivity {
         });
     }
 
+    private String mAudioPath = null;
+
     @OnClick(R.id.btn_rt_start_record)
     void startRtRecord() {
-        mRtRecordDirPath = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译/";
+        String date = FileUtil.getCurrentTime();
+        mRtRecordDirPath = Environment.getExternalStorageDirectory().getPath() + "/record/对话翻译/" + date;
         File dir = new File(mRtRecordDirPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
 
-        String date = FileUtil.getCurrentTime();
+        // text path
         mRtRecordTextPath = mRtRecordDirPath + "/" + date + ".txt";
+        // audio path
+        mAudioPath = mRtRecordDirPath + "/" + date + ".pcm";
+
         FileUtil.addStringToFile(String.format("文件创建于%s\n%s\n\n", date, DIVIDER),
                 mRtRecordTextPath);
 //        tvRtRecordHint.setText(String.format("开始记录，记录保存至%s", mRtRecordDirPath));
-        tvRtRecordHint.setText(String.format("开始记录，记录保存至根目录%s", "/record/对话翻译/"));
+        tvRtRecordHint.setText(String.format("开始记录，记录保存至根目录%s", "/record/对话翻译/" + date));
         setRecordButtonEnabled(true);
     }
 
     @OnClick(R.id.btn_rt_stop_record)
     void stopRtRecord() {
         if (mRtRecordDirPath != null) {
-            tvRtRecordHint.setText(String.format("停止记录，记录保存至%s", mRtRecordTextPath));
+            tvRtRecordHint.setText(String.format("停止记录，记录保存至%s", mRtRecordDirPath));
             mRtRecordDirPath = null;
             mRtRecordTextPath = null;
+
+            if (mAudioPath != null) {
+                FileUtil.savePcmAsWav(mAudioPath);
+                mAudioPath = null;
+            }
         }
         setRecordButtonEnabled(false);
     }

@@ -1,8 +1,11 @@
 package com.example.qkx.translator.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,6 +36,26 @@ public class FileUtil {
         } finally {
             if (pw != null) {
                 pw.close();
+            }
+        }
+    }
+
+    public static void saveBytesToFile(String filePath, byte[] bytes) {
+        if (filePath == null) return;
+
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(new File(filePath), true);
+            os.write(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -85,5 +108,43 @@ public class FileUtil {
         header[42] = (byte) ((totalAudioLen >> 16) & 0xff);
         header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
         out.write(header, 0, 44);
+    }
+
+    public static void savePcmAsWav(String pcmFilePath) {
+        if (pcmFilePath == null || !pcmFilePath.endsWith("pcm")) return;
+
+        String wavFilePath = pcmFilePath.replace("pcm", "wav");
+        FileInputStream in = null;
+        FileOutputStream out = null;
+        try {
+            in = new FileInputStream(pcmFilePath);
+            out = new FileOutputStream(wavFilePath);
+
+            long totalAudioLen = in.getChannel().size();
+            long totalDataLen = totalAudioLen + 36;
+            long longSampleRate = 16000L;
+            int channels = 1;
+            long byteRate = 16 * longSampleRate * channels / 8;
+            addWavHeaderToFile(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
+
+            byte[] buffer = new byte[1024 * 4];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

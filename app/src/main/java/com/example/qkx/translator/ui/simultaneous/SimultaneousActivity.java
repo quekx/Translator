@@ -258,7 +258,10 @@ public class SimultaneousActivity extends BaseDetailActivity {
         int ret = mIat.startListening(new com.iflytek.cloud.RecognizerListener() {
             @Override
             public void onVolumeChanged(int i, byte[] bytes) {
-                saveAudioBytesToFile(bytes);
+//                saveAudioBytesToFile(bytes);
+                if (mAudioPath != null) {
+                    FileUtil.saveBytesToFile(mAudioPath, bytes);
+                }
             }
 
             @Override
@@ -363,7 +366,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
         // audio path
         mAudioPath = String.format("%s/%s.pcm", mSycRecordDirPath, date);
-
+        // text path
         mSycRecordTextPath = String.format("%s/%s.txt", mSycRecordDirPath, date);
         FileUtil.addStringToFile(String.format("文本创建于%s\n%s\n\n", date, DIVIDER),
                 mSycRecordTextPath);
@@ -403,48 +406,13 @@ public class SimultaneousActivity extends BaseDetailActivity {
             mSycRecordDirPath = null;
             mSycRecordTextPath = null;
 
-            savePcmAsWav();
-            mAudioPath = null;
+//            savePcmAsWav();
+            if (mAudioPath != null) {
+                FileUtil.savePcmAsWav(mAudioPath);
+                mAudioPath = null;
+            }
         }
 //        setRecordButtonEnabled(false);
-    }
-
-    private void savePcmAsWav() {
-        if (mAudioPath == null) return;
-
-        String newAudioPath = mAudioPath.replace("pcm", "wav");
-        FileInputStream in = null;
-        FileOutputStream out = null;
-        try {
-            in = new FileInputStream(mAudioPath);
-            out = new FileOutputStream(newAudioPath);
-
-            long totalAudioLen = in.getChannel().size();
-            long totalDataLen = totalAudioLen + 36;
-            long longSampleRate = 16000L;
-            int channels = 1;
-            long byteRate = 16 * longSampleRate * channels / 8;
-            FileUtil.addWavHeaderToFile(out, totalAudioLen, totalDataLen, longSampleRate, channels, byteRate);
-
-            byte[] buffer = new byte[1024 * 4];
-            int len;
-            while ((len = in.read(buffer)) != -1) {
-                out.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @OnClick(R.id.btn_stop_speak_syc)
