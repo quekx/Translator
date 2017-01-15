@@ -6,9 +6,9 @@ import android.os.Bundle;
 
 import com.example.qkx.translator.MyApp;
 import com.example.qkx.translator.R;
-import com.example.qkx.translator.Speech.BaseRecognizerListener;
-import com.example.qkx.translator.Speech.BaseSynthesizerListener;
-import com.example.qkx.translator.Speech.SpeechManager;
+import com.example.qkx.translator.speech.BaseRecognizerListener;
+import com.example.qkx.translator.speech.BaseSynthesizerListener;
+import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.ui.conversation.ConversationActivity;
 import com.example.qkx.translator.ui.setting.SettingActivity;

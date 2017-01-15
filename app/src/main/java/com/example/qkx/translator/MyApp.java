@@ -2,7 +2,6 @@ package com.example.qkx.translator;
 
 import android.app.Application;
 
-import com.example.qkx.translator.Speech.SpeechManager;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 import com.socks.library.KLog;

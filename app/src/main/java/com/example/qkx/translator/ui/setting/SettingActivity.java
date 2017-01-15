@@ -58,8 +58,6 @@ public class SettingActivity extends BaseDetailActivity {
     Spinner mSpinnerSpeed;
     @Bind(R.id.spinner_volume)
     Spinner mSpinnerVolume;
-    @Bind(R.id.spinner_domain)
-    Spinner mSpinnerDomain;
 
     @Bind(R.id.checkbox_sound_control)
     CheckBox mCheckBoxSoundControl;
@@ -69,9 +67,6 @@ public class SettingActivity extends BaseDetailActivity {
     private String[] mVoiceDisplayNames = {"青年女声(小燕)", "青年男声(小峰)", "中年男声(老孙)", "女声播音员(小筠)"};
     private String[] mVoiceNames = {"xiaoyan", "xiaofeng", "vils", "aisjying"};
     private String[] mVolumes = {"10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
-
-    private String[] mDomains = {"iat", "video", "music"};
-    private String[] mDomainNames = {"短信和日常用语", "视频", "音乐"};
 
     private void init() {
         mDefaultName = ConfigManager.getInstance().getVoiceName();
@@ -213,25 +208,6 @@ public class SettingActivity extends BaseDetailActivity {
         });
         index = getConfigIndex(mEosTimeMillis, Constants.KEY_AVD_EOS);
         mSpinnerEos.setSelection(index != -1 ? index : 0);
-
-        // 场景
-        ArrayAdapter<String> adapterDomain = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, mDomainNames);
-        adapterDomain.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpinnerDomain.setAdapter(adapterDomain);
-        mSpinnerDomain.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mDefaultDomain = mDomains[position];
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        index = getConfigIndex(mDomains, Constants.KEY_DOMAIN);
-        mSpinnerDomain.setSelection(index != -1 ? index : 0);
 
         mCheckBoxSoundControl.setChecked(ConfigManager.getInstance().isSoundControlOpen());
     }

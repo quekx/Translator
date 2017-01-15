@@ -49,38 +49,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="同声翻译设置"
-        android:textColor="@android:color/black"
-        android:textSize="16.0sp" />
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:text="应用场景" />
-
-        <Spinner
-            android:id="@+id/spinner_domain"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:text="声控设置"
         android:textColor="@android:color/black"
         android:textSize="16.0sp" />
 
     <RelativeLayout
-        android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -89,11 +65,11 @@
             android:text="声控开关" />
 
         <CheckBox
-            android:layout_marginRight="10dp"
-            android:layout_alignParentRight="true"
             android:id="@+id/checkbox_sound_control"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp" />
     </RelativeLayout>
 
     <TextView
@@ -164,4 +140,27 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="测试发音" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="youxiangdong@139.com"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/tv_email"
+            android:layout_centerHorizontal="true"
+            android:text="技术支持反馈"
+            android:textSize="10sp" />
+
+    </RelativeLayout>
 </LinearLayout>

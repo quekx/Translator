@@ -13,9 +13,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.example.qkx.translator.R;
-import com.example.qkx.translator.Speech.BaseRecognizerListener;
-import com.example.qkx.translator.Speech.BaseSynthesizerListener;
-import com.example.qkx.translator.Speech.SpeechManager;
+import com.example.qkx.translator.speech.BaseRecognizerListener;
+import com.example.qkx.translator.speech.BaseSynthesizerListener;
+import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
@@ -30,14 +30,9 @@ import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
-import com.iflytek.cloud.SynthesizerListener;
 import com.socks.library.KLog;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -153,6 +148,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
     }
 
     private void recognizeChinese() {
+        KLog.e(TAG, "recognizeChinese()");
         recognizeSpeechSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
@@ -184,6 +180,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
     }
 
     private void recognizeEnglish() {
+        KLog.e(TAG, "recognizeEnglish()");
         recognizeSpeechSyc(new ResultCallback() {
             @Override
             public void onProcessResult(String result) {
@@ -222,8 +219,10 @@ public class SimultaneousActivity extends BaseDetailActivity {
      */
     private void recognizeSpeechSyc(final ResultCallback callback, String language) {
         // 场景
-        mIat.setParameter(SpeechConstant.DOMAIN, ConfigManager.getInstance().getDomain());
+        String domain = ConfigManager.getInstance().getDomain();
+        mIat.setParameter(SpeechConstant.DOMAIN, domain);
 
+        KLog.d(TAG, "recognize: domain >> " + domain + ", language >> " + language);
         mIat.setParameter(SpeechConstant.LANGUAGE, language);
         if (language.equals("zh_cn")) {
             mIat.setParameter(SpeechConstant.ACCENT, "mandarin");
@@ -317,26 +316,6 @@ public class SimultaneousActivity extends BaseDetailActivity {
 
     private String mAudioPath = null;
 
-    private void saveAudioBytesToFile(byte[] bytes) {
-        if (mAudioPath == null) return;
-
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream(new File(mAudioPath), true);
-            os.write(bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
         ButterKnife.bind(this);
@@ -399,14 +378,11 @@ public class SimultaneousActivity extends BaseDetailActivity {
         speak();
     }
 
-    //    @OnClick(R.id.btn_syc_stop_record)
     void stopSycRecord() {
         if (mSycRecordDirPath != null) {
-//            ToastUtil.showToastShort(this, String.format("停止记录，记录保存至目录%s", mSycRecordDirPath));
             mSycRecordDirPath = null;
             mSycRecordTextPath = null;
 
-//            savePcmAsWav();
             if (mAudioPath != null) {
                 FileUtil.savePcmAsWav(mAudioPath);
                 mAudioPath = null;
@@ -495,37 +471,7 @@ public class SimultaneousActivity extends BaseDetailActivity {
         SpeechManager.getInstance().synthesizeSpeech("好的", listener);
     }
 
-//    private void stopSpeechSynthesizing() {
-//        SpeechManager.getInstance().stopSpeechSynthesizing();
-//    }
-
     private void stopSpeechRecognizing() {
         SpeechManager.getInstance().stopSpeechRecognizing();
-    }
-
-    class MySynthesizerListener implements SynthesizerListener {
-        MySynthesizerListener() {
-        }
-
-        public void onBufferProgress(int paramInt1, int paramInt2, int paramInt3, String paramString) {
-        }
-
-        public void onCompleted(SpeechError paramSpeechError) {
-        }
-
-        public void onEvent(int paramInt1, int paramInt2, int paramInt3, Bundle paramBundle) {
-        }
-
-        public void onSpeakBegin() {
-        }
-
-        public void onSpeakPaused() {
-        }
-
-        public void onSpeakProgress(int paramInt1, int paramInt2, int paramInt3) {
-        }
-
-        public void onSpeakResumed() {
-        }
     }
 }

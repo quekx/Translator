@@ -1,6 +1,5 @@
-package com.example.qkx.translator.Speech;
+package com.example.qkx.translator.speech;
 
-import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.qkx.translator.MyApp;

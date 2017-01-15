@@ -1,4 +1,4 @@
-package com.example.qkx.translator.Speech;
+package com.example.qkx.translator.speech;
 
 import android.os.Bundle;
 

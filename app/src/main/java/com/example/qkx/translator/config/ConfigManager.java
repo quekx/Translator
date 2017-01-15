@@ -2,7 +2,7 @@ package com.example.qkx.translator.config;
 
 import com.example.qkx.translator.MyApp;
 import com.example.qkx.translator.Constants;
-import com.example.qkx.translator.Speech.SpeechManager;
+import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.utils.PreferenceUtil;
 
 /**
