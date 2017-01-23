@@ -14,6 +14,7 @@ import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
 import com.example.qkx.translator.rest.RestSource;
 import com.example.qkx.translator.rest.RestSource.TranslateCallback;
+import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.ui.ResultCallback;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.FileUtil;
@@ -58,7 +59,6 @@ public class ConversationActivity extends BaseDetailActivity {
     private String mRtRecordTextPath = null;
     private String mRtRecordDirPath = null;
 
-    private SynthesizerListener mSynListener;
     private SpeechSynthesizer mTts;
     @Bind(R.id.tv_rt)
     TextView tvRt;
@@ -91,7 +91,6 @@ public class ConversationActivity extends BaseDetailActivity {
     }
 
     private void initTts() {
-        this.mSynListener = new MySynthesizerListener();
         this.mTts = SpeechSynthesizer.createSynthesizer(this, null);
     }
 
@@ -100,21 +99,7 @@ public class ConversationActivity extends BaseDetailActivity {
     }
 
     private void read(String str, String voiceName, String speed, String volume) {
-        //1.创建 SpeechSynthesizer 对象, 第二个参数:本地合成时传 InitListener
-//        SpeechSynthesizer mTts = SpeechSynthesizer.createSynthesizer(this, null);
-        //2.合成参数设置,详见《MSC Reference Manual》SpeechSynthesizer 类
-        //设置发音人(更多在线发音人,用户可参见 附录13.2
-        mTts.setParameter(SpeechConstant.VOICE_NAME, voiceName); //设置发音人
-        mTts.setParameter(SpeechConstant.SPEED, speed);//设置语速
-        mTts.setParameter(SpeechConstant.VOLUME, volume);//设置音量,范围 0~100
-        mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD); //设置云端
-        //设置合成音频保存位置(可自定义保存位置),保存在“./sdcard/iflytek.pcm”
-        //保存在 SD 卡需要在 AndroidManifest.xml 添加写 SD 卡权限
-        // 仅支持保存为 pcm 和 wav 格式,如果不需要保存合成音频,注释该行代码
-        mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, "./sdcard/iflytek.pcm");
-        //3.开始合成
-//        mTts.startSpeaking("科大讯飞,让世界聆听我们的声音", mSynListener);
-        mTts.startSpeaking(str, mSynListener);
+        SpeechManager.getInstance().synthesizeSpeech(str, voiceName, speed, volume);
     }
 
     private void setRecordButtonEnabled(boolean isRecording) {
@@ -350,40 +335,5 @@ public class ConversationActivity extends BaseDetailActivity {
             }
         }
         setRecordButtonEnabled(false);
-    }
-
-    class MySynthesizerListener implements SynthesizerListener {
-        MySynthesizerListener() {
-        }
-
-        //会话结束回调接口,没有错误时,error为null
-        public void onCompleted(SpeechError error) {
-        }
-
-        //缓冲进度回调
-        //percent为缓冲进度0~100,beginPos为缓冲音频在文本中开始位置,endPos表示缓冲音频在文本中结束位置,info为附加信息。
-        public void onBufferProgress(int percent, int beginPos, int endPos, String info) {
-        }
-
-        //开始播放
-        public void onSpeakBegin() {
-        }
-
-        //暂停播放
-        public void onSpeakPaused() {
-        }
-
-        //播放进度回调
-        //percent为播放进度0~100,beginPos为播放音频在文本中开始位置,endPos表示播放音频在文本中结束位置.
-        public void onSpeakProgress(int percent, int beginPos, int endPos) {
-        }
-
-        //恢复播放回调接口
-        public void onSpeakResumed() {
-        }
-
-        //会话事件回调接口
-        public void onEvent(int arg0, int arg1, int arg2, Bundle arg3) {
-        }
     }
 }

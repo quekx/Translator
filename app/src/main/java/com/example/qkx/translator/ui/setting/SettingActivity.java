@@ -18,6 +18,7 @@ import butterknife.OnClick;
 import com.example.qkx.translator.Constants;
 import com.example.qkx.translator.R;
 import com.example.qkx.translator.config.ConfigManager;
+import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.ui.base.BaseDetailActivity;
 import com.example.qkx.translator.utils.PreferenceUtil;
 import com.example.qkx.translator.utils.ToastUtil;
@@ -62,7 +63,6 @@ public class SettingActivity extends BaseDetailActivity {
     @Bind(R.id.checkbox_sound_control)
     CheckBox mCheckBoxSoundControl;
 
-    private MySynthesizerListener mSynListener;
     private SpeechSynthesizer mTts;
     private String[] mVoiceDisplayNames = {"青年女声(小燕)", "青年男声(小峰)", "中年男声(老孙)", "女声播音员(小筠)"};
     private String[] mVoiceNames = {"xiaoyan", "xiaofeng", "vils", "aisjying"};
@@ -78,26 +78,11 @@ public class SettingActivity extends BaseDetailActivity {
     }
 
     private void initTts() {
-        this.mSynListener = new MySynthesizerListener();
         this.mTts = SpeechSynthesizer.createSynthesizer(this, null);
     }
 
     private void read(String str, String voiceName, String speed, String volume) {
-        //1.创建 SpeechSynthesizer 对象, 第二个参数:本地合成时传 InitListener
-//        SpeechSynthesizer mTts = SpeechSynthesizer.createSynthesizer(this, null);
-        //2.合成参数设置,详见《MSC Reference Manual》SpeechSynthesizer 类
-        //设置发音人(更多在线发音人,用户可参见 附录13.2
-        mTts.setParameter(SpeechConstant.VOICE_NAME, voiceName); //设置发音人
-        mTts.setParameter(SpeechConstant.SPEED, speed);//设置语速
-        mTts.setParameter(SpeechConstant.VOLUME, volume);//设置音量,范围 0~100
-        mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD); //设置云端
-        //设置合成音频保存位置(可自定义保存位置),保存在“./sdcard/iflytek.pcm”
-        //保存在 SD 卡需要在 AndroidManifest.xml 添加写 SD 卡权限
-        // 仅支持保存为 pcm 和 wav 格式,如果不需要保存合成音频,注释该行代码
-        mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, "./sdcard/iflytek.pcm");
-        //3.开始合成
-//        mTts.startSpeaking("科大讯飞,让世界聆听我们的声音", mSynListener);
-        mTts.startSpeaking(str, mSynListener);
+        SpeechManager.getInstance().synthesizeSpeech(str, voiceName, speed, volume);
     }
 
     private void saveConfig() {
@@ -261,7 +246,7 @@ public class SettingActivity extends BaseDetailActivity {
         }
     }
 
-    class MySynthesizerListener implements SynthesizerListener {
+    /*class MySynthesizerListener implements SynthesizerListener {
         MySynthesizerListener() {
         }
 
@@ -294,6 +279,6 @@ public class SettingActivity extends BaseDetailActivity {
         //会话事件回调接口
         public void onEvent(int arg0, int arg1, int arg2, Bundle arg3) {
         }
-    }
+    }*/
 }
 

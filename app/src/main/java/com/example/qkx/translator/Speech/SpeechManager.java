@@ -4,6 +4,8 @@ import android.text.TextUtils;
 
 import com.example.qkx.translator.MyApp;
 import com.example.qkx.translator.config.ConfigManager;
+import com.example.qkx.translator.speech.base.BaseRecognizerListener;
+import com.example.qkx.translator.speech.base.BaseSynthesizerListener;
 import com.example.qkx.translator.utils.ToastUtil;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;

@@ -13,8 +13,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.example.qkx.translator.R;
-import com.example.qkx.translator.speech.BaseRecognizerListener;
-import com.example.qkx.translator.speech.BaseSynthesizerListener;
+import com.example.qkx.translator.speech.base.BaseRecognizerListener;
+import com.example.qkx.translator.speech.base.BaseSynthesizerListener;
 import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.data.ResultBean;
