@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Translator</string>
+
+    <string name="login">login</string>
+    <string name="register">register</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+
+    <string name="send">send</string>
+</resources>

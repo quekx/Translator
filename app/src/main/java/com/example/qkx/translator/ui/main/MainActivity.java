@@ -3,6 +3,8 @@ package com.example.qkx.translator.ui.main;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.example.qkx.translator.MyApp;
 import com.example.qkx.translator.R;
@@ -11,6 +13,7 @@ import com.example.qkx.translator.speech.base.BaseSynthesizerListener;
 import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.ui.conversation.ConversationActivity;
+import com.example.qkx.translator.ui.meeting.login.MeetingLoginActivity;
 import com.example.qkx.translator.ui.setting.SettingActivity;
 import com.example.qkx.translator.ui.simultaneous.SimultaneousActivity;
 import com.example.qkx.translator.ui.orc.OrcActivity;
@@ -154,6 +157,27 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
         }
+    }
+
+    private void startMeeting() {
+        Intent intent = new Intent(this, MeetingLoginActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_start_meeting:
+                startMeeting();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
