@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">翻译助手v1.09</string>
+    <string name="app_name">翻译助手v2.01</string>
 
     <string name="camera">拍照</string>
     <string name="camera_crop">拍照裁剪</string>
@@ -22,7 +22,6 @@
     <string name="title_orc">图片翻译</string>
     <string name="title_setting">参数设置</string>
     <string name="title_simultaneous">同声翻译</string>
-
 
     <string name="login">登录</string>
     <string name="register">注册</string>

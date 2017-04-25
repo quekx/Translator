@@ -79,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(this, SimultaneousActivity.class));
     }
 
+    @OnClick(R.id.img_meeting)
+    void startMeeting() {
+        Intent intent = new Intent(this, MeetingLoginActivity.class);
+        startActivity(intent);
+    }
+
     // 合成相关
     private void stopSpeechSynthesizing() {
         SpeechManager.getInstance().stopSpeechSynthesizing();
@@ -159,11 +165,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startMeeting() {
-        Intent intent = new Intent(this, MeetingLoginActivity.class);
-        startActivity(intent);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

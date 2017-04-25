@@ -17,7 +17,7 @@
 
     <style name="title">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">180dp</item>
+        <item name="android:layout_height">160dp</item>
         <item name="android:layout_weight">1</item>
     </style>
 

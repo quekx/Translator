@@ -1,6 +1,28 @@
 <resources>
     <string name="app_name">Translator</string>
 
+    <string name="camera">拍照</string>
+    <string name="camera_crop">拍照裁剪</string>
+    <string name="gallery">相册</string>
+    <string name="gallery_crop">相册裁剪</string>
+
+    <string name="start_orc">开始识别</string>
+    <string name="start_record">开始记录</string>
+    <string name="start_speak_simultaneous">开始翻译</string>
+    <string name="stop_record">停止记录</string>
+    <string name="stop_speak_simultaneous">停止翻译</string>
+    <string name="switchover_ch">切换至英文翻译</string>
+    <string name="switchover_en">切换至中文翻译</string>
+
+    <string name="take_photo">拍照记录</string>
+
+    <string name="translate">翻译</string>
+
+    <string name="title_conversation">对话翻译</string>
+    <string name="title_orc">图片翻译</string>
+    <string name="title_setting">参数设置</string>
+    <string name="title_simultaneous">同声翻译</string>
+
     <string name="login">login</string>
     <string name="register">register</string>
     <string name="username">username</string>
