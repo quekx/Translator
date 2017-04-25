@@ -9,12 +9,16 @@ import android.text.TextUtils;
 import android.widget.EditText;
 
 import com.example.qkx.translator.R;
+import com.example.qkx.translator.speech.SpeechManager;
+import com.example.qkx.translator.speech.base.BaseRecognizerListener;
 import com.example.qkx.translator.ui.meeting.GsonUtil;
 import com.example.qkx.translator.utils.DebugLog;
+import com.example.qkx.translator.utils.SpeechUtil;
 import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.exceptions.HyphenateException;
+import com.iflytek.cloud.RecognizerResult;
 
 import java.util.List;
 
@@ -100,6 +104,19 @@ public class MeetingDetailActivity extends AppCompatActivity {
         EMMessage message = EMMessage.createTxtSendMessage(msg, mTestGroupId);
         message.setChatType(EMMessage.ChatType.GroupChat);
         EMClient.getInstance().chatManager().sendMessage(message);
+    }
+
+    @OnClick(R.id.btn_speech)
+    void recognizeSpeech() {
+        SpeechManager.getInstance().recognizeChinese(new BaseRecognizerListener() {
+            @Override
+            public void onResult(RecognizerResult recognizerResult, boolean b) {
+                String json = recognizerResult.getResultString();
+                String result = SpeechUtil.parseJsonResult(json);
+
+                mEditSendMsg.setText(mEditSendMsg.getText().toString() + result);
+            }
+        });
     }
 
     private void addMessageBean(final MeetingDetailMessage messageBean) {
