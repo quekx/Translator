@@ -13,6 +13,7 @@ import com.example.qkx.translator.speech.base.BaseSynthesizerListener;
 import com.example.qkx.translator.speech.SpeechManager;
 import com.example.qkx.translator.config.ConfigManager;
 import com.example.qkx.translator.ui.conversation.ConversationActivity;
+import com.example.qkx.translator.ui.introduction.IntroductionActivity;
 import com.example.qkx.translator.ui.meeting.login.MeetingLoginActivity;
 import com.example.qkx.translator.ui.setting.SettingActivity;
 import com.example.qkx.translator.ui.simultaneous.SimultaneousActivity;
@@ -82,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.img_meeting)
     void startMeeting() {
         Intent intent = new Intent(this, MeetingLoginActivity.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.img_introduction)
+    void startIntroduction() {
+        Intent intent = new Intent(this, IntroductionActivity.class);
         startActivity(intent);
     }
 

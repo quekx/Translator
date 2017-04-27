@@ -52,6 +52,7 @@
         <activity android:name=".ui.conversation.ConversationActivity" />
         <activity android:name=".ui.orc.OrcActivity" />
         <activity android:name=".ui.simultaneous.SimultaneousActivity" />
+        <activity android:name=".ui.introduction.IntroductionActivity"/>
 
         <!--meeting-->
         <activity android:name=".ui.meeting.login.MeetingLoginActivity"

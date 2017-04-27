@@ -29,4 +29,7 @@
     <string name="password">password</string>
 
     <string name="send">send</string>
+
+    <string name="speech">speech</string>
+
 </resources>

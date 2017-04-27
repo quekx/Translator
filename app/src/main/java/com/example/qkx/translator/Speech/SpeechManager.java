@@ -125,7 +125,7 @@ public class SpeechManager {
         recognizeSpeech(listener, "zh_cn", null, null);
     }
 
-    public void reconizeEnglish(BaseRecognizerListener listener) {
+    public void recognizeEnglish(BaseRecognizerListener listener) {
         recognizeSpeech(listener, "en_us", null, null);
     }
 

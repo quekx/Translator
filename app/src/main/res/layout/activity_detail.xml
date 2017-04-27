@@ -19,7 +19,7 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:text="speech"
+            android:text="@string/speech"
             android:id="@+id/btn_speech"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

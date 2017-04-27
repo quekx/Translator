@@ -67,6 +67,7 @@ public class MeetingRegisterActivity extends AppCompatActivity {
                             ToastUtil.showToastShort(MyApp.getAppInstance(), "register failed!");
                         }
                     });
+                    return;
                 }
 
                 runOnUiThread(new Runnable() {
