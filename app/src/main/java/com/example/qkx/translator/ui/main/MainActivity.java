@@ -160,8 +160,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        mRecognizeTime = 0;
-        tryStartSoundControl();
+//        mRecognizeTime = 0;
+//        tryStartSoundControl();
     }
 
     private void tryStartSoundControl() {

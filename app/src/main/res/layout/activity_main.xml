@@ -4,6 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
+    android:background="#EEEFF1"
     android:paddingLeft="20dp"
     android:paddingRight="20dp">
 
@@ -14,7 +15,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="40dp"
         android:layout_marginTop="40dp"
-        android:src="@drawable/img_1" />
+        android:src="@drawable/title" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -24,12 +25,12 @@
         <ImageView
             android:id="@+id/img_conversation"
             style="@style/title"
-            android:src="@drawable/img_2" />
+            android:src="@drawable/speak" />
 
         <ImageView
             android:id="@+id/img_simultaneous"
             style="@style/title"
-            android:src="@drawable/img_3" />
+            android:src="@drawable/listen" />
     </LinearLayout>
 
     <LinearLayout
@@ -41,11 +42,11 @@
         <ImageView
             android:id="@+id/img_orc"
             style="@style/title"
-            android:src="@drawable/img_4" />
+            android:src="@drawable/ocr" />
 
         <ImageView
             android:id="@+id/img_setting"
             style="@style/title"
-            android:src="@drawable/img_5" />
+            android:src="@drawable/help" />
     </LinearLayout>
 </LinearLayout>
